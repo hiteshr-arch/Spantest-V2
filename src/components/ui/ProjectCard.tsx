@@ -1,7 +1,3 @@
-import { Card, Typography } from 'antd'
-
-const { Title, Text } = Typography
-
 interface ProjectCardProps {
   name: string
   meta: string
@@ -14,78 +10,162 @@ interface ProjectCardProps {
 function ProjectCard({ name, meta, tags, onClick, dashed, status = 'active' }: ProjectCardProps) {
   if (dashed) {
     return (
-      <Card
-        hoverable
+      <div
         onClick={onClick}
         style={{
-          minHeight: 156,
-          borderStyle: 'dashed',
-          borderColor: '#D7D9E2',
-          borderRadius: 14,
+          minHeight: 148,
+          border: '1px dashed var(--border-mid)',
+          borderRadius: 12,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'rgba(55, 123, 255, 0.08)',
-          color: '#3466D6',
-          fontWeight: 600,
+          gap: 6,
+          background: 'var(--accent-subtle)',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s ease, background 0.2s ease',
+        }}
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderColor = 'rgba(124, 58, 237, 0.35)'
+          el.style.background = 'rgba(124, 58, 237, 0.07)'
+          el.style.boxShadow = 'var(--shadow-md)'
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderColor = 'var(--border-mid)'
+          el.style.background = 'var(--accent-subtle)'
+          el.style.boxShadow = 'none'
         }}
       >
-        + New Project
-      </Card>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            background: 'var(--accent)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 18,
+            color: '#fff',
+            fontWeight: 300,
+          }}
+        >
+          +
+        </div>
+        <span
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--accent-hover)',
+          }}
+        >
+          New Project
+        </span>
+      </div>
     )
   }
 
-  const statusColor = status === 'active' ? '#4CAF50' : status === 'idle' ? '#FFA726' : '#B0B0B0'
+  const statusColor =
+    status === 'active' ? 'var(--green)' : status === 'idle' ? 'var(--orange)' : 'var(--text-faint)'
+  const statusBg =
+    status === 'active' ? 'var(--green-bg)' : status === 'idle' ? 'var(--orange-bg)' : 'rgba(0,0,0,0.05)'
+  const statusLabel = status === 'active' ? 'Active' : status === 'idle' ? 'Idle' : 'Stale'
 
   return (
-    <Card
-      hoverable
+    <div
       onClick={onClick}
       style={{
-        borderRadius: 14,
-        minHeight: 156,
-        boxShadow: '0 8px 18px rgba(15, 23, 42, 0.06)',
-        borderColor: '#ECEEF3',
+        position: 'relative',
+        borderRadius: 16,
+        minHeight: 148,
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        padding: '18px 20px',
+        cursor: 'pointer',
+        transition: 'transform 0.18s ease, box-shadow 0.2s ease, border-color 0.18s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        boxShadow: 'var(--shadow-sm)',
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget as HTMLDivElement
+        el.style.borderColor = 'rgba(124, 58, 237, 0.25)'
+        el.style.transform = 'translateY(-3px)'
+        el.style.boxShadow = 'var(--shadow-lg)'
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget as HTMLDivElement
+        el.style.borderColor = 'var(--border)'
+        el.style.transform = 'translateY(0)'
+        el.style.boxShadow = 'var(--shadow-sm)'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <Title level={5} style={{ margin: 0, color: 'var(--text-primary)' }}>
-          {name}
-        </Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <span
           style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {name}
+        </span>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 11,
+            color: statusColor,
+            fontWeight: 600,
+            background: statusBg,
+            padding: '3px 8px',
             borderRadius: 999,
-            backgroundColor: statusColor,
-            width: 10,
-            height: 10,
-            display: 'inline-block',
           }}
           title={status}
-        />
-      </div>
-
-      <Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 13 }}>
-        {meta}
-      </Text>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {tags.map((tag) => (
+        >
           <span
-            key={tag}
             style={{
+              width: 5,
+              height: 5,
               borderRadius: 999,
-              border: '1px solid #E4E6EA',
-              padding: '4px 10px',
-              fontSize: 12,
-              color: '#4E5B72',
-              fontWeight: 500,
+              backgroundColor: statusColor,
+              flexShrink: 0,
             }}
-          >
-            {tag}
-          </span>
-        ))}
+          />
+          {statusLabel}
+        </span>
       </div>
-    </Card>
+
+      <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>{meta}</span>
+
+      {tags.length > 0 && (
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 'auto', paddingTop: 4 }}>
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              style={{
+                borderRadius: 999,
+                border: '1px solid rgba(124, 58, 237, 0.15)',
+                padding: '3px 9px',
+                fontSize: 11,
+                color: 'var(--accent)',
+                fontWeight: 600,
+                background: 'rgba(124, 58, 237, 0.05)',
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

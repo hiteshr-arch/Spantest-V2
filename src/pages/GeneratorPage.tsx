@@ -40,6 +40,7 @@ function GeneratorPage() {
     setScenarios,
     adjustTokens,
     toggleTestCaseSelected,
+    clearSelectedTestCases,
     setGeneratedScript,
   } = useSpantestStore()
   const params = useParams()
@@ -57,6 +58,54 @@ function GeneratorPage() {
     () => [...scenarios.map((s) => s.testCase), ...manualTestCases],
     [scenarios, manualTestCases],
   )
+
+  const handleAddTestCase = () => {
+    const newTC: TestCase = {
+      id: `manual-${Date.now()}`,
+      name: '',
+      priority: 'Low',
+      expectedResult: '',
+      steps: [{ n: 1, action: '', expected: '' }],
+    }
+    setManualTestCases((prev) => [...prev, newTC])
+    scrollToTestCases()
+  }
+
+  const handleDeleteTestCase = (id: string) => {
+    if (scenarios.some((s) => s.testCase.id === id)) {
+      setScenarios(scenarios.filter((s) => s.testCase.id !== id))
+    } else {
+      setManualTestCases((prev) => prev.filter((tc) => tc.id !== id))
+      if (selectedTCIds.includes(id)) toggleTestCaseSelected(id)
+    }
+  }
+
+  const handleUpdateTestCase = (id: string, updates: Partial<TestCase>) => {
+    if (scenarios.some((s) => s.testCase.id === id)) {
+      setScenarios(
+        scenarios.map((s) =>
+          s.testCase.id === id ? { ...s, testCase: { ...s.testCase, ...updates } } : s,
+        ),
+      )
+    } else {
+      setManualTestCases((prev) =>
+        prev.map((tc) => (tc.id === id ? { ...tc, ...updates } : tc)),
+      )
+    }
+  }
+
+  const handleBulkDelete = () => {
+    const aiIds = new Set(selectedTCIds.filter((id) => scenarios.some((s) => s.testCase.id === id)))
+    const manualIds = new Set(selectedTCIds.filter((id) => !aiIds.has(id)))
+    if (aiIds.size > 0) {
+      // setScenarios also clears selectedTCIds in the store
+      setScenarios(scenarios.filter((s) => !aiIds.has(s.testCase.id)))
+    }
+    if (manualIds.size > 0) {
+      setManualTestCases((prev) => prev.filter((tc) => !manualIds.has(tc.id)))
+    }
+    clearSelectedTestCases()
+  }
 
   const handleStartGenerate = async () => {
     const story = form.getFieldValue('story') as string | undefined
@@ -266,7 +315,7 @@ ${body}
           <button
             type="button"
             className={styles.manualAdd}
-            onClick={() => message.success('Manual test case added (mock).')}
+            onClick={handleAddTestCase}
           >
             <span style={{ fontSize: 16, color: '#ccc' }}>+</span>
             Add test case manually
@@ -312,7 +361,7 @@ ${body}
             </div>
           )}
 
-          {!isGenerating && !!scenarios.length && (
+          {!isGenerating && !!testCases.length && (
             <div style={{ padding: 16 }} ref={testCasesRef}>
               {(clarifyAnswers.stackCoupon || clarifyAnswers.expiredMessage) && (
                 <div
@@ -365,7 +414,10 @@ ${body}
                 testCases={testCases}
                 selectedIds={selectedTCIds}
                 onToggleSelected={toggleTestCaseSelected}
-                setManualTestCases={setManualTestCases}
+                onDeleteTestCase={handleDeleteTestCase}
+                onDeleteSelected={handleBulkDelete}
+                onUpdateTestCase={handleUpdateTestCase}
+                onAddTestCase={handleAddTestCase}
               />
 
               {generatedScript && (

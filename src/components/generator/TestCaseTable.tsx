@@ -1,307 +1,538 @@
-import { Table, Button, Input, Modal } from 'antd'
+import { Table, Input, Select } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import type { TestCase, TestStep } from '../../types/generator'
 import { useState } from 'react'
 
-interface TestCaseRow extends TestCase {
-  description?: string
-  tags?: string
+const PRIORITY_OPTIONS = [
+  { value: 'High', label: 'High' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'Low', label: 'Low' },
+]
+
+const PRIORITY_COLORS: Record<string, string> = {
+  High: '#ef4444',
+  Medium: '#f59e0b',
+  Low: '#10b981',
+}
+
+function PriorityBadge({ value }: { value: string }) {
+  const color = PRIORITY_COLORS[value] || '#8b87a0'
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        fontSize: 12,
+        fontWeight: 600,
+        color,
+        background: `${color}18`,
+        border: `1px solid ${color}35`,
+        borderRadius: 8,
+        padding: '4px 10px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <span style={{ width: 6, height: 6, borderRadius: 999, background: color, flexShrink: 0 }} />
+      {value}
+    </span>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="15" viewBox="0 0 14 15" fill="none" aria-hidden="true">
+      <path d="M1 4.5h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M5 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="2.5" y="4.5" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5.5 7.5v3M8.5 7.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconBtn({
+  title,
+  onClick,
+  color,
+  hoverColor,
+  hoverBg,
+  hoverBorder,
+  children,
+}: {
+  title: string
+  onClick: (e: React.MouseEvent) => void
+  color?: string
+  hoverColor: string
+  hoverBg: string
+  hoverBorder: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={(e) => { e.stopPropagation(); onClick(e) }}
+      style={{
+        minWidth: 36,
+        minHeight: 36,
+        width: 36,
+        height: 36,
+        borderRadius: 8,
+        border: '1px solid transparent',
+        background: 'transparent',
+        color: color ?? 'var(--text-muted)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 16,
+        lineHeight: 1,
+        transition: 'all 0.12s ease',
+        flexShrink: 0,
+        fontFamily: 'inherit',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = hoverColor
+        e.currentTarget.style.background = hoverBg
+        e.currentTarget.style.borderColor = hoverBorder
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = color ?? 'var(--text-muted)'
+        e.currentTarget.style.background = 'transparent'
+        e.currentTarget.style.borderColor = 'transparent'
+      }}
+    >
+      {children}
+    </button>
+  )
 }
 
 interface TestCaseTableProps {
-  testCases: TestCaseRow[]
+  testCases: TestCase[]
   selectedIds: string[]
   onToggleSelected: (id: string) => void
-  setManualTestCases: React.Dispatch<React.SetStateAction<TestCaseRow[]>>
+  onDeleteTestCase: (id: string) => void
+  onDeleteSelected: () => void
+  onUpdateTestCase: (id: string, updates: Partial<TestCase>) => void
+  onAddTestCase: () => void
 }
 
-function TestCaseTable({ testCases, selectedIds, onToggleSelected, setManualTestCases }: TestCaseTableProps) {
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [newTestCase, setNewTestCase] = useState<TestCaseRow>({ id: '', name: '', priority: 'Low', expectedResult: '', steps: [], description: '', tags: '' })
-  const [newSteps, setNewSteps] = useState<TestStep[]>([{ n: 1, action: '', expected: '' }])
-  const dataSource: TestCaseRow[] = testCases
-
+function TestCaseTable({
+  testCases,
+  selectedIds,
+  onToggleSelected,
+  onDeleteTestCase,
+  onDeleteSelected,
+  onUpdateTestCase,
+  onAddTestCase,
+}: TestCaseTableProps) {
   const [expandedRowIds, setExpandedRowIds] = useState<string[]>([])
-  const columns: ColumnsType<TestCaseRow> = [
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState<Partial<TestCase>>({})
+
+  const startEdit = (row: TestCase) => {
+    setEditingId(row.id)
+    setDraft({
+      name: row.name,
+      description: row.description ?? '',
+      priority: row.priority,
+      expectedResult: row.expectedResult,
+      tags: row.tags ?? '',
+    })
+  }
+
+  const saveEdit = () => {
+    if (editingId) onUpdateTestCase(editingId, draft)
+    setEditingId(null)
+    setDraft({})
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setDraft({})
+  }
+
+  const allSelected = testCases.length > 0 && testCases.every((tc) => selectedIds.includes(tc.id))
+  const someSelected = testCases.some((tc) => selectedIds.includes(tc.id)) && !allSelected
+  const hasSelection = selectedIds.length > 0
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      testCases.forEach((tc) => { if (selectedIds.includes(tc.id)) onToggleSelected(tc.id) })
+    } else {
+      testCases.forEach((tc) => { if (!selectedIds.includes(tc.id)) onToggleSelected(tc.id) })
+    }
+  }
+
+  const columns: ColumnsType<TestCase> = [
     {
-      title: '',
+      title: (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          ref={(el) => { if (el) el.indeterminate = someSelected }}
+          onChange={handleSelectAll}
+          style={{ cursor: 'pointer', width: 16, height: 16 }}
+        />
+      ),
       dataIndex: 'id',
-      width: 48,
+      width: 52,
       render: (value: string) => (
         <input
           type="checkbox"
           checked={selectedIds.includes(value)}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggleSelected(value)
-          }}
+          onChange={(e) => { e.stopPropagation(); onToggleSelected(value) }}
+          style={{ cursor: 'pointer', width: 16, height: 16 }}
         />
       ),
     },
     {
-      title: 'Name',
+      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Name</span>,
       dataIndex: 'name',
+      render: (value: string, row: TestCase) =>
+        row.id === editingId ? (
+          <Input
+            value={draft.name ?? ''}
+            onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+            autoFocus
+            style={{ fontSize: 14, fontWeight: 500, height: 36 }}
+            placeholder="Test case name"
+          />
+        ) : (
+          <span style={{ fontSize: 13, fontWeight: 500, color: value ? 'var(--text-primary)' : 'var(--text-muted)', fontStyle: value ? 'normal' : 'italic', lineHeight: '22px' }}>
+            {value || 'Untitled'}
+          </span>
+        ),
     },
     {
-      title: 'Description',
+      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Description</span>,
       dataIndex: 'description',
-      width: 120,
-      render: (value: string) => <span style={{ fontSize: 12 }}>{value}</span>,
+      width: 200,
+      render: (value: string | undefined, row: TestCase) =>
+        row.id === editingId ? (
+          <Input
+            value={draft.description ?? ''}
+            onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+            style={{ fontSize: 13, height: 36 }}
+            placeholder="Optional description"
+          />
+        ) : (
+          <span style={{ fontSize: 13, color: value ? 'var(--text-secondary)' : 'var(--text-muted)', lineHeight: '22px' }}>
+            {value || '—'}
+          </span>
+        ),
     },
     {
-      title: 'Tags',
-      dataIndex: 'tags',
-      width: 80,
-      render: (value: string) => <span style={{ fontSize: 12, color: '#888' }}>{value}</span>,
-    },
-    {
-      title: 'Priority',
+      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Priority</span>,
       dataIndex: 'priority',
-      width: 96,
-      render: (value: string) => (
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value}</span>
-      ),
+      width: 140,
+      render: (value: string, row: TestCase) =>
+        row.id === editingId ? (
+          <Select
+            value={draft.priority ?? value}
+            onChange={(val) => setDraft((d) => ({ ...d, priority: val as 'High' | 'Medium' | 'Low' }))}
+            options={PRIORITY_OPTIONS}
+            style={{ width: '100%', height: 36 }}
+            labelRender={({ value: v }) => <PriorityBadge value={v as string} />}
+            optionRender={(opt) => <PriorityBadge value={opt.value as string} />}
+          />
+        ) : (
+          <PriorityBadge value={value} />
+        ),
     },
     {
-      title: 'Expected Result',
+      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Expected Result</span>,
       dataIndex: 'expectedResult',
+      render: (value: string, row: TestCase) =>
+        row.id === editingId ? (
+          <Input
+            value={draft.expectedResult ?? ''}
+            onChange={(e) => setDraft((d) => ({ ...d, expectedResult: e.target.value }))}
+            style={{ fontSize: 13, height: 36 }}
+            placeholder="Expected outcome"
+          />
+        ) : (
+          <span style={{ fontSize: 13, color: value ? 'var(--text-secondary)' : 'var(--text-muted)', lineHeight: '22px' }}>
+            {value || '—'}
+          </span>
+        ),
     },
-    // chevron column removed
+    {
+      title: '',
+      key: 'actions',
+      width: 88,
+      render: (_: unknown, row: TestCase) =>
+        row.id === editingId ? (
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <IconBtn
+              title="Save changes"
+              onClick={saveEdit}
+              color="#16a34a"
+              hoverColor="#16a34a"
+              hoverBg="rgba(22,163,74,0.1)"
+              hoverBorder="rgba(22,163,74,0.3)"
+            >
+              {/* checkmark */}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8.5L6.5 12L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </IconBtn>
+            <IconBtn
+              title="Cancel editing"
+              onClick={cancelEdit}
+              hoverColor="var(--text-secondary)"
+              hoverBg="rgba(100,100,120,0.08)"
+              hoverBorder="rgba(100,100,120,0.2)"
+            >
+              {/* x-mark */}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </IconBtn>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <IconBtn
+              title="Edit test case"
+              onClick={() => startEdit(row)}
+              hoverColor="var(--accent)"
+              hoverBg="var(--accent-subtle)"
+              hoverBorder="var(--accent-border)"
+            >
+              {/* pencil icon */}
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M10.5 2a1.5 1.5 0 0 1 2.12 2.12L5.5 11.24 3 12l.76-2.5L10.5 2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </IconBtn>
+            <IconBtn
+              title="Delete test case"
+              onClick={() => onDeleteTestCase(row.id)}
+              hoverColor="#ef4444"
+              hoverBg="rgba(239,68,68,0.09)"
+              hoverBorder="rgba(239,68,68,0.25)"
+            >
+              <TrashIcon />
+            </IconBtn>
+          </div>
+        ),
+    },
   ]
-
-  const updateManualTestCase = (id: string, updates: Partial<TestCaseRow>) => {
-    setManualTestCases((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)))
-  }
-
-  const updateManualTestCaseStep = (id: string, stepN: number, updates: Partial<TestStep>) => {
-    setManualTestCases((prev) =>
-      prev.map((item) => {
-        if (item.id !== id || !item.steps) return item
-        return {
-          ...item,
-          steps: item.steps.map((step) => (step.n === stepN ? { ...step, ...updates } : step)),
-        }
-      }),
-    )
-  }
 
   return (
     <>
-      <div style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-        <Button type="primary" size="small" onClick={() => {
-          const newId = Date.now().toString()
-          setManualTestCases((prev) => [
-            ...prev,
-            {
-              id: newId,
-              name: '',
-              priority: 'Low',
-              expectedResult: '',
-              description: '',
-              tags: '',
-              steps: [{ n: 1, action: '', expected: '' }],
-            },
-          ])
-          setExpandedRowIds([...expandedRowIds, newId])
-        }}>
-          Add Test Case
-        </Button>
+      {/* Toolbar */}
+      <div
+        style={{
+          marginBottom: 12,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>
+          {testCases.length} test case{testCases.length !== 1 ? 's' : ''}
+        </span>
+
+        {hasSelection ? (
+          <button
+            type="button"
+            onClick={onDeleteSelected}
+            style={{
+              height: 36,
+              padding: '0 16px',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 10,
+              background: 'rgba(239,68,68,0.05)',
+              color: '#ef4444',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-display)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.5)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(239,68,68,0.05)'
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'
+            }}
+          >
+            <TrashIcon />
+            Delete ({selectedIds.length})
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onAddTestCase}
+            style={{
+              height: 36,
+              padding: '0 16px',
+              border: '1px dashed var(--border-mid)',
+              borderRadius: 10,
+              background: 'transparent',
+              color: 'var(--accent)',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-display)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--accent-subtle)'
+              e.currentTarget.style.borderStyle = 'solid'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.borderStyle = 'dashed'
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            Add Test Case
+          </button>
+        )}
       </div>
-      <Table<TestCaseRow>
-        size="small"
+
+      <Table<TestCase>
+        size="middle"
         rowKey="id"
-        columns={columns.map((col) => {
-          if (!('dataIndex' in col) || typeof col.dataIndex !== 'string') {
-            return col
-          }
-
-          const editableFields = ['name', 'description', 'priority', 'expectedResult', 'tags'] as const
-          const dataIndex = col.dataIndex as keyof TestCaseRow
-          if (!editableFields.includes(dataIndex as typeof editableFields[number])) {
-            return col
-          }
-
-          return {
-            ...col,
-            render: (value: string, row: TestCaseRow) => (
-              <Input
-                value={value}
-                onChange={(e) => {
-                  const newValue = e.target.value
-                  updateManualTestCase(row.id, { [dataIndex]: newValue } as Partial<TestCaseRow>)
-                }}
-                size="small"
-              />
-            ),
-          }
-        })}
-        dataSource={dataSource}
+        columns={columns}
+        dataSource={testCases}
         pagination={false}
         expandedRowKeys={expandedRowIds}
         onExpand={(expanded, record) => {
           setExpandedRowIds((ids) =>
-            expanded
-              ? [...ids, record.id]
-              : ids.filter((id) => id !== record.id)
+            expanded ? [...ids, record.id] : ids.filter((id) => id !== record.id),
           )
         }}
         expandable={{
           expandedRowRender: (record) => {
-            const tc = testCases.find((t) => t.id === record.id)
-            if (!tc) return null
+            const steps = record.steps || []
+            if (!steps.length) {
+              return (
+                <div style={{ padding: '12px 20px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  No steps defined.
+                </div>
+              )
+            }
             return (
-              <div>
+              <div style={{ padding: '10px 16px 16px' }}>
                 <Table<TestStep>
-                  size="small"
+                  size="middle"
                   rowKey="n"
                   pagination={false}
                   columns={[
+                    { title: <span style={{ fontSize: 12, fontWeight: 600 }}>#</span>, dataIndex: 'n', width: 52 },
                     {
-                      title: '#',
-                      dataIndex: 'n',
-                      width: 48,
-                    },
-                    {
-                      title: 'Action',
+                      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Action</span>,
                       dataIndex: 'action',
-                      render: (value: string, step: TestStep) => (
+                      render: (val: string, step: TestStep) => (
                         <Input
-                          value={value}
+                          value={val}
                           onChange={(e) => {
-                            const newValue = e.target.value
-                            updateManualTestCaseStep(tc.id, step.n, { action: newValue })
+                            const newSteps = steps.map((s) =>
+                              s.n === step.n ? { ...s, action: e.target.value } : s,
+                            )
+                            onUpdateTestCase(record.id, { steps: newSteps })
                           }}
-                          size="small"
+                          variant="borderless"
+                          style={{ fontSize: 13, height: 36 }}
+                          placeholder="Describe the action"
                         />
                       ),
                     },
                     {
-                      title: 'Expected Result',
+                      title: <span style={{ fontSize: 12, fontWeight: 600 }}>Expected</span>,
                       dataIndex: 'expected',
-                      render: (value: string, step: TestStep) => (
+                      render: (val: string, step: TestStep) => (
                         <Input
-                          value={value}
+                          value={val}
                           onChange={(e) => {
-                            const newValue = e.target.value
-                            updateManualTestCaseStep(tc.id, step.n, { expected: newValue })
+                            const newSteps = steps.map((s) =>
+                              s.n === step.n ? { ...s, expected: e.target.value } : s,
+                            )
+                            onUpdateTestCase(record.id, { steps: newSteps })
                           }}
-                          size="small"
+                          variant="borderless"
+                          style={{ fontSize: 13, height: 36 }}
+                          placeholder="Expected outcome"
                         />
+                      ),
+                    },
+                    {
+                      title: '',
+                      key: 'del',
+                      width: 52,
+                      render: (_: unknown, step: TestStep) => (
+                        <IconBtn
+                          title="Delete step"
+                          onClick={() => {
+                            const newSteps = steps
+                              .filter((s) => s.n !== step.n)
+                              .map((s, i) => ({ ...s, n: i + 1 }))
+                            onUpdateTestCase(record.id, { steps: newSteps })
+                          }}
+                          hoverColor="#ef4444"
+                          hoverBg="rgba(239,68,68,0.09)"
+                          hoverBorder="rgba(239,68,68,0.25)"
+                        >
+                          <TrashIcon />
+                        </IconBtn>
                       ),
                     },
                   ]}
-                  dataSource={tc.steps || newSteps}
+                  dataSource={steps}
                 />
-                <Button
-                  size="small"
-                  style={{ marginTop: 8 }}
+                <button
+                  type="button"
                   onClick={() => {
-                    if (tc.steps) {
-                      const nextN = tc.steps.length + 1
-                      setManualTestCases((prev) =>
-                        prev.map((item) =>
-                          item.id === tc.id
-                            ? { ...item, steps: [...item.steps, { n: nextN, action: '', expected: '' }] }
-                            : item,
-                        ),
-                      )
-                    }
+                    const newStep: TestStep = { n: steps.length + 1, action: '', expected: '' }
+                    onUpdateTestCase(record.id, { steps: [...steps, newStep] })
+                  }}
+                  style={{
+                    marginTop: 10,
+                    height: 34,
+                    padding: '0 14px',
+                    border: '1px dashed var(--border-mid)',
+                    borderRadius: 8,
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    transition: 'all 0.12s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--accent)'
+                    e.currentTarget.style.borderColor = 'var(--accent-border)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-muted)'
+                    e.currentTarget.style.borderColor = 'var(--border-mid)'
                   }}
                 >
-                  Add Step
-                </Button>
+                  + Add Step
+                </button>
               </div>
             )
           },
         }}
       />
-      <Modal
-        title="Add Test Case"
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onOk={() => {
-          const caseToAdd: TestCaseRow = {
-            id: Date.now().toString(),
-            name: newTestCase.name,
-            priority: newTestCase.priority,
-            expectedResult: newTestCase.expectedResult,
-            description: newTestCase.description,
-            tags: newTestCase.tags,
-            steps: newSteps.map((s, idx) => ({ n: idx + 1, action: s.action, expected: s.expected })),
-          }
-          setManualTestCases((prev) => [...prev, caseToAdd])
-          setIsModalVisible(false)
-          setNewTestCase({ id: '', name: '', priority: 'Low', expectedResult: '', steps: [], description: '', tags: '' })
-          setNewSteps([{ n: 1, action: '', expected: '' }])
-        }}
-      >
-        <Input
-          placeholder="Name"
-          value={newTestCase.name}
-          onChange={e => setNewTestCase({ ...newTestCase, name: e.target.value })}
-          style={{ marginBottom: 8 }}
-        />
-        <Input
-          placeholder="Priority"
-          value={newTestCase.priority}
-          onChange={e => setNewTestCase({ ...newTestCase, priority: e.target.value as 'Low' | 'Medium' | 'High' })}
-          style={{ marginBottom: 8 }}
-        />
-        <Input
-          placeholder="Expected Result"
-          value={newTestCase.expectedResult}
-          onChange={e => setNewTestCase({ ...newTestCase, expectedResult: e.target.value })}
-          style={{ marginBottom: 8 }}
-        />
-        <Input
-          placeholder="Description"
-          value={newTestCase.description}
-          onChange={e => setNewTestCase({ ...newTestCase, description: e.target.value })}
-          style={{ marginBottom: 8 }}
-        />
-        <Input
-          placeholder="Tags"
-          value={newTestCase.tags}
-          onChange={e => setNewTestCase({ ...newTestCase, tags: e.target.value })}
-          style={{ marginBottom: 8 }}
-        />
-        <div style={{ marginBottom: 8 }}>
-          <span style={{ fontWeight: 500 }}>Steps:</span>
-          {newSteps.map((step, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-              <Input
-                placeholder="Action"
-                value={step.action}
-                onChange={e => {
-                  const steps = [...newSteps]
-                  steps[idx].action = e.target.value
-                  setNewSteps(steps)
-                }}
-                style={{ width: 120 }}
-              />
-              <Input
-                placeholder="Expected"
-                value={step.expected}
-                onChange={e => {
-                  const steps = [...newSteps]
-                  steps[idx].expected = e.target.value
-                  setNewSteps(steps)
-                }}
-                style={{ width: 120 }}
-              />
-              <Button size="small" onClick={() => setNewSteps(newSteps.filter((_, i) => i !== idx))}>
-                Remove
-              </Button>
-            </div>
-          ))}
-          <Button size="small" onClick={() => setNewSteps([...newSteps, { n: newSteps.length + 1, action: '', expected: '' }])}>
-            Add Step
-          </Button>
-        </div>
-      </Modal>
     </>
   )
 }
 
 export default TestCaseTable
-

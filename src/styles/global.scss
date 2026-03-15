@@ -1,4 +1,15 @@
-@import './theme.scss';
+@use './theme.scss';
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 *,
 *::before,
@@ -16,16 +27,20 @@ body,
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text-primary);
-}
-
-body {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 15% 20%, rgba(124, 58, 237, 0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 75%, rgba(168, 85, 247, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 35% at 60% 5%,  rgba(196, 181, 253, 0.08) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -33,13 +48,18 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ddd;
+  background: rgba(124, 58, 237, 0.15);
   border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.28);
 }
 
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: fadeUp 0.3s ease both;
 }
 
