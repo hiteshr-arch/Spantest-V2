@@ -1,0 +1,595 @@
+@use '../styles/theme.scss';
+
+// ─── Page wrapper ─────────────────────────────────────────────────────────────
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ─── Page Header ──────────────────────────────────────────────────────────────
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.topUpBtn {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.12s ease;
+  margin-top: 4px;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ─── Stats Row ────────────────────────────────────────────────────────────────
+.statsRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 14px;
+}
+
+// Purple balance card
+.balanceCard {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 60%, #5b21b6 100%);
+  border-radius: 16px;
+  padding: 22px 24px 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+  }
+}
+
+.balanceLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.balanceNumber {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.balanceSub {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.balanceMeta {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+// Generic stat card
+.statCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.statLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.statNumber {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.statMeta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.statFooter {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+// Plan card specifics
+.planName {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+
+.planTagline {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.planDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.planRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+
+  span:first-child {
+    color: var(--text-muted);
+  }
+
+  span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+// ─── Middle Row ───────────────────────────────────────────────────────────────
+.midRow {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 14px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+// Usage list
+.usageList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.usageRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.usageTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.usageLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.usageValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+// Cost list
+.costList {
+  display: flex;
+  flex-direction: column;
+}
+
+.costRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.costLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.tokenBadge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.freeBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.22);
+  border-radius: 6px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ─── Top Up Section ───────────────────────────────────────────────────────────
+.topUpSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.sectionSub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pricingRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.pricingCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+.pricingCardFeatured {
+  border-color: var(--accent);
+  border-width: 2px;
+  background: rgba(124, 58, 237, 0.02);
+  padding-top: 36px; // room for the badge
+}
+
+.popularBadge {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 5px 14px;
+  border-radius: 0 0 10px 10px;
+  white-space: nowrap;
+  font-family: var(--font-display);
+}
+
+.pricingName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.pricingTokens {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pricingTokenLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 4px 0 14px;
+}
+
+.pricingPrice {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.pricingPriceAccent {
+  color: var(--accent);
+}
+
+.pricingFreq {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.pricingPer {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.pricingPerAccent {
+  color: var(--accent);
+}
+
+.buyBtn {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+}
+
+.buyBtnPrimary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+
+  &:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #fff;
+  }
+}
+
+.pricingNote {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+// ─── Bottom Row (activity + info) ────────────────────────────────────────────
+.bottomRow {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+// ─── Recent Activity ──────────────────────────────────────────────────────────
+.activitySection {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.activityInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.activityLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.activityDate {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.activityRight {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.activityDelta {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-bottom: 2px;
+}
+
+.activityBal {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+// ─── Tips Card ───────────────────────────────────────────────────────────────
+.tipsCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tipsTitle {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tipRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+// ─── Info Banner ──────────────────────────────────────────────────────────────
+.infoBanner {
+  background: rgba(124, 58, 237, 0.04);
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.infoHighlight {
+  font-weight: 700;
+  color: var(--accent);
+}
