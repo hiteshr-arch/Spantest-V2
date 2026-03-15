@@ -50,6 +50,15 @@ function TrashIcon() {
   )
 }
 
+function LockIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="2" y="6" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function IconBtn({
   title,
   onClick,
@@ -116,6 +125,8 @@ interface TestCaseTableProps {
   onDeleteSelected: () => void
   onUpdateTestCase: (id: string, updates: Partial<TestCase>) => void
   onAddTestCase: () => void
+  locked?: boolean
+  onUnlock?: () => void
 }
 
 function TestCaseTable({
@@ -126,6 +137,8 @@ function TestCaseTable({
   onDeleteSelected,
   onUpdateTestCase,
   onAddTestCase,
+  locked = false,
+  onUnlock,
 }: TestCaseTableProps) {
   const [expandedRowIds, setExpandedRowIds] = useState<string[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -173,7 +186,8 @@ function TestCaseTable({
           checked={allSelected}
           ref={(el) => { if (el) el.indeterminate = someSelected }}
           onChange={handleSelectAll}
-          style={{ cursor: 'pointer', width: 16, height: 16 }}
+          disabled={locked}
+          style={{ cursor: locked ? 'not-allowed' : 'pointer', width: 16, height: 16, opacity: locked ? 0.4 : 1 }}
         />
       ),
       dataIndex: 'id',
@@ -183,7 +197,8 @@ function TestCaseTable({
           type="checkbox"
           checked={selectedIds.includes(value)}
           onChange={(e) => { e.stopPropagation(); onToggleSelected(value) }}
-          style={{ cursor: 'pointer', width: 16, height: 16 }}
+          disabled={locked}
+          style={{ cursor: locked ? 'not-allowed' : 'pointer', width: 16, height: 16, opacity: locked ? 0.4 : 1 }}
         />
       ),
     },
@@ -191,7 +206,7 @@ function TestCaseTable({
       title: <span style={{ fontSize: 12, fontWeight: 600 }}>Name</span>,
       dataIndex: 'name',
       render: (value: string, row: TestCase) =>
-        row.id === editingId ? (
+        !locked && row.id === editingId ? (
           <Input
             value={draft.name ?? ''}
             onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
@@ -210,7 +225,7 @@ function TestCaseTable({
       dataIndex: 'description',
       width: 200,
       render: (value: string | undefined, row: TestCase) =>
-        row.id === editingId ? (
+        !locked && row.id === editingId ? (
           <Input
             value={draft.description ?? ''}
             onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
@@ -228,7 +243,7 @@ function TestCaseTable({
       dataIndex: 'priority',
       width: 140,
       render: (value: string, row: TestCase) =>
-        row.id === editingId ? (
+        !locked && row.id === editingId ? (
           <Select
             value={draft.priority ?? value}
             onChange={(val) => setDraft((d) => ({ ...d, priority: val as 'High' | 'Medium' | 'Low' }))}
@@ -245,7 +260,7 @@ function TestCaseTable({
       title: <span style={{ fontSize: 12, fontWeight: 600 }}>Expected Result</span>,
       dataIndex: 'expectedResult',
       render: (value: string, row: TestCase) =>
-        row.id === editingId ? (
+        !locked && row.id === editingId ? (
           <Input
             value={draft.expectedResult ?? ''}
             onChange={(e) => setDraft((d) => ({ ...d, expectedResult: e.target.value }))}
@@ -262,8 +277,15 @@ function TestCaseTable({
       title: '',
       key: 'actions',
       width: 88,
-      render: (_: unknown, row: TestCase) =>
-        row.id === editingId ? (
+      render: (_: unknown, row: TestCase) => {
+        if (locked) {
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint)', opacity: 0.4 }}>
+              <LockIcon />
+            </div>
+          )
+        }
+        return row.id === editingId ? (
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <IconBtn
               title="Save changes"
@@ -273,7 +295,6 @@ function TestCaseTable({
               hoverBg="rgba(22,163,74,0.1)"
               hoverBorder="rgba(22,163,74,0.3)"
             >
-              {/* checkmark */}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8.5L6.5 12L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -285,7 +306,6 @@ function TestCaseTable({
               hoverBg="rgba(100,100,120,0.08)"
               hoverBorder="rgba(100,100,120,0.2)"
             >
-              {/* x-mark */}
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
@@ -300,7 +320,6 @@ function TestCaseTable({
               hoverBg="var(--accent-subtle)"
               hoverBorder="var(--accent-border)"
             >
-              {/* pencil icon */}
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                 <path d="M10.5 2a1.5 1.5 0 0 1 2.12 2.12L5.5 11.24 3 12l.76-2.5L10.5 2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
               </svg>
@@ -315,7 +334,8 @@ function TestCaseTable({
               <TrashIcon />
             </IconBtn>
           </div>
-        ),
+        )
+      },
     },
   ]
 
@@ -334,7 +354,42 @@ function TestCaseTable({
           {testCases.length} test case{testCases.length !== 1 ? 's' : ''}
         </span>
 
-        {hasSelection ? (
+        {locked ? (
+          /* Lock banner — replaces add/delete toolbar button */
+          <button
+            type="button"
+            onClick={onUnlock}
+            style={{
+              height: 36,
+              padding: '0 16px',
+              border: '1px solid var(--border-mid)',
+              borderRadius: 10,
+              background: 'var(--surface-raised)',
+              color: 'var(--text-secondary)',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-display)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--accent-border)'
+              e.currentTarget.style.color = 'var(--accent)'
+              e.currentTarget.style.background = 'var(--accent-subtle)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-mid)'
+              e.currentTarget.style.color = 'var(--text-secondary)'
+              e.currentTarget.style.background = 'var(--surface-raised)'
+            }}
+          >
+            <LockIcon />
+            Edit &amp; Regenerate Script
+          </button>
+        ) : hasSelection ? (
           <button
             type="button"
             onClick={onDeleteSelected}
@@ -440,13 +495,15 @@ function TestCaseTable({
                         <Input
                           value={val}
                           onChange={(e) => {
+                            if (locked) return
                             const newSteps = steps.map((s) =>
                               s.n === step.n ? { ...s, action: e.target.value } : s,
                             )
                             onUpdateTestCase(record.id, { steps: newSteps })
                           }}
+                          readOnly={locked}
                           variant="borderless"
-                          style={{ fontSize: 13, height: 36 }}
+                          style={{ fontSize: 13, height: 36, cursor: locked ? 'default' : 'text' }}
                           placeholder="Describe the action"
                         />
                       ),
@@ -458,13 +515,15 @@ function TestCaseTable({
                         <Input
                           value={val}
                           onChange={(e) => {
+                            if (locked) return
                             const newSteps = steps.map((s) =>
                               s.n === step.n ? { ...s, expected: e.target.value } : s,
                             )
                             onUpdateTestCase(record.id, { steps: newSteps })
                           }}
+                          readOnly={locked}
                           variant="borderless"
-                          style={{ fontSize: 13, height: 36 }}
+                          style={{ fontSize: 13, height: 36, cursor: locked ? 'default' : 'text' }}
                           placeholder="Expected outcome"
                         />
                       ),
@@ -473,59 +532,62 @@ function TestCaseTable({
                       title: '',
                       key: 'del',
                       width: 52,
-                      render: (_: unknown, step: TestStep) => (
-                        <IconBtn
-                          title="Delete step"
-                          onClick={() => {
-                            const newSteps = steps
-                              .filter((s) => s.n !== step.n)
-                              .map((s, i) => ({ ...s, n: i + 1 }))
-                            onUpdateTestCase(record.id, { steps: newSteps })
-                          }}
-                          hoverColor="#ef4444"
-                          hoverBg="rgba(239,68,68,0.09)"
-                          hoverBorder="rgba(239,68,68,0.25)"
-                        >
-                          <TrashIcon />
-                        </IconBtn>
-                      ),
+                      render: (_: unknown, step: TestStep) =>
+                        locked ? null : (
+                          <IconBtn
+                            title="Delete step"
+                            onClick={() => {
+                              const newSteps = steps
+                                .filter((s) => s.n !== step.n)
+                                .map((s, i) => ({ ...s, n: i + 1 }))
+                              onUpdateTestCase(record.id, { steps: newSteps })
+                            }}
+                            hoverColor="#ef4444"
+                            hoverBg="rgba(239,68,68,0.09)"
+                            hoverBorder="rgba(239,68,68,0.25)"
+                          >
+                            <TrashIcon />
+                          </IconBtn>
+                        ),
                     },
                   ]}
                   dataSource={steps}
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newStep: TestStep = { n: steps.length + 1, action: '', expected: '' }
-                    onUpdateTestCase(record.id, { steps: [...steps, newStep] })
-                  }}
-                  style={{
-                    marginTop: 10,
-                    height: 34,
-                    padding: '0 14px',
-                    border: '1px dashed var(--border-mid)',
-                    borderRadius: 8,
-                    background: 'transparent',
-                    color: 'var(--text-muted)',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    transition: 'all 0.12s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'var(--accent)'
-                    e.currentTarget.style.borderColor = 'var(--accent-border)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--text-muted)'
-                    e.currentTarget.style.borderColor = 'var(--border-mid)'
-                  }}
-                >
-                  + Add Step
-                </button>
+                {!locked && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newStep: TestStep = { n: steps.length + 1, action: '', expected: '' }
+                      onUpdateTestCase(record.id, { steps: [...steps, newStep] })
+                    }}
+                    style={{
+                      marginTop: 10,
+                      height: 34,
+                      padding: '0 14px',
+                      border: '1px dashed var(--border-mid)',
+                      borderRadius: 8,
+                      background: 'transparent',
+                      color: 'var(--text-muted)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      transition: 'all 0.12s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--accent)'
+                      e.currentTarget.style.borderColor = 'var(--accent-border)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-muted)'
+                      e.currentTarget.style.borderColor = 'var(--border-mid)'
+                    }}
+                  >
+                    + Add Step
+                  </button>
+                )}
               </div>
             )
           },

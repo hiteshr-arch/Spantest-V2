@@ -25,6 +25,7 @@ function GeneratorPage() {
   const [form] = Form.useForm()
   const [isGenerating, setIsGenerating] = useState(false)
   const [isClarifyVisible, setIsClarifyVisible] = useState(false)
+  const [isInputCollapsed, setIsInputCollapsed] = useState(false)
   const [clarifyAnswers, setClarifyAnswers] = useState({
     stackCoupon: '',
     expiredMessage: '',
@@ -120,6 +121,7 @@ function GeneratorPage() {
 
     setGeneratorStep(2)
     setIsClarifyVisible(true)
+    setIsInputCollapsed(true)
     scrollToClarify()
   }
 
@@ -230,54 +232,85 @@ ${body}
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
               <span style={{ fontSize: 13, fontWeight: 500 }}>Input</span>
-              <Button type="text" size="small">
-                Import from Jira
-              </Button>
-            </div>
-            <div className={styles.panelBody}>
-              <Form
-                form={form}
-                layout="vertical"
-                initialValues={{
-                  story:
-                    'As a user, I want to apply a discount coupon at checkout so that I can get a reduced price on my order.',
-                  framework: FRAMEWORK_OPTIONS[0],
-                  style: STYLE_OPTIONS[0],
-                }}
-              >
-                <Form.Item
-                  label="User story / prompt"
-                  name="story"
-                  style={{ marginBottom: 16 }}
-                >
-                  <TextArea rows={5} placeholder="As a user, I want to…" />
-                </Form.Item>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <Form.Item label="Framework" name="framework">
-                    <Select options={FRAMEWORK_OPTIONS.map((f) => ({ value: f, label: f }))} />
-                  </Form.Item>
-                  <Form.Item label="Style" name="style">
-                    <Select options={STYLE_OPTIONS.map((s) => ({ value: s, label: s }))} />
-                  </Form.Item>
-                </div>
+              {isInputCollapsed ? (
                 <Button
-                  type="primary"
-                  block
-                  size="large"
-                  onClick={handleStartGenerate}
-                  disabled={isGenerating}
+                  type="text"
+                  size="small"
+                  onClick={() => {
+                    setIsInputCollapsed(false)
+                    setIsClarifyVisible(false)
+                    setGeneratorStep(1)
+                  }}
+                  style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 600 }}
                 >
-                  ⚡ Generate Tests
+                  Edit
                 </Button>
-                <Paragraph
-                  type="secondary"
-                  style={{ fontSize: 12, marginTop: 8, marginBottom: 0 }}
-                >
-                  Better stories yield better tests. Include happy paths, edge cases, and
-                  important constraints.
-                </Paragraph>
-              </Form>
+              ) : (
+                <Button type="text" size="small">
+                  Import from Jira
+                </Button>
+              )}
             </div>
+
+            {/* ── Collapsed summary ── */}
+            {isInputCollapsed ? (
+              <div className={styles.storyCollapsed}>
+                <div className={styles.storySnippet}>
+                  {(form.getFieldValue('story') as string | undefined)?.slice(0, 100) ?? ''}
+                  {((form.getFieldValue('story') as string | undefined)?.length ?? 0) > 100 && '…'}
+                </div>
+                <div className={styles.storyMeta}>
+                  <span className={styles.storyMetaPill}>{form.getFieldValue('framework') as string}</span>
+                  <span className={styles.storyMetaPill}>{form.getFieldValue('style') as string}</span>
+                </div>
+              </div>
+            ) : (
+              /* ── Expanded form ── */
+              <div className={styles.panelBody}>
+                <Form
+                  form={form}
+                  layout="vertical"
+                  initialValues={{
+                    story:
+                      'As a user, I want to apply a discount coupon at checkout so that I can get a reduced price on my order.',
+                    framework: FRAMEWORK_OPTIONS[0],
+                    style: STYLE_OPTIONS[0],
+                  }}
+                >
+                  <Form.Item
+                    label="User story / prompt"
+                    name="story"
+                    style={{ marginBottom: 16 }}
+                  >
+                    <TextArea rows={5} placeholder="As a user, I want to…" />
+                  </Form.Item>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <Form.Item label="Framework" name="framework">
+                      <Select options={FRAMEWORK_OPTIONS.map((f) => ({ value: f, label: f }))} />
+                    </Form.Item>
+                    <Form.Item label="Style" name="style">
+                      <Select options={STYLE_OPTIONS.map((s) => ({ value: s, label: s }))} />
+                    </Form.Item>
+                  </div>
+                  <Button
+                    type="primary"
+                    block
+                    size="large"
+                    onClick={handleStartGenerate}
+                    disabled={isGenerating}
+                  >
+                    ⚡ Generate Tests
+                  </Button>
+                  <Paragraph
+                    type="secondary"
+                    style={{ fontSize: 12, marginTop: 8, marginBottom: 0 }}
+                  >
+                    Better stories yield better tests. Include happy paths, edge cases, and
+                    important constraints.
+                  </Paragraph>
+                </Form>
+              </div>
+            )}
           </div>
 
           {isClarifyVisible && (
@@ -364,26 +397,25 @@ ${body}
           {!isGenerating && !!testCases.length && (
             <div style={{ padding: 16 }} ref={testCasesRef}>
               {(clarifyAnswers.stackCoupon || clarifyAnswers.expiredMessage) && (
-                <div
-                  style={{
-                    marginBottom: 12,
-                    border: '1px solid var(--border)',
-                    borderRadius: 8,
-                    padding: 10,
-                    background: 'var(--surface)',
-                  }}
-                >
-                  <div style={{ fontWeight: 600, marginBottom: 6 }}>Clarifications used</div>
-                  {clarifyAnswers.stackCoupon && (
-                    <div style={{ marginBottom: 4 }}>
-                      <strong>Coupon stack:</strong> {clarifyAnswers.stackCoupon}
-                    </div>
-                  )}
-                  {clarifyAnswers.expiredMessage && (
-                    <div>
-                      <strong>Expired message:</strong> {clarifyAnswers.expiredMessage}
-                    </div>
-                  )}
+                <div className={styles.clarifyUsed}>
+                  <div className={styles.clarifyUsedHeader}>
+                    <span className={styles.clarifyUsedDot} />
+                    Clarified
+                  </div>
+                  <div className={styles.clarifyChips}>
+                    {clarifyAnswers.stackCoupon && (
+                      <div className={styles.clarifyChip}>
+                        <span className={styles.clarifyChipLabel}>Coupon stack</span>
+                        <span className={styles.clarifyChipValue}>{clarifyAnswers.stackCoupon}</span>
+                      </div>
+                    )}
+                    {clarifyAnswers.expiredMessage && (
+                      <div className={styles.clarifyChip}>
+                        <span className={styles.clarifyChipLabel}>Expired msg</span>
+                        <span className={styles.clarifyChipValue}>{clarifyAnswers.expiredMessage}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               <div
@@ -418,6 +450,8 @@ ${body}
                 onDeleteSelected={handleBulkDelete}
                 onUpdateTestCase={handleUpdateTestCase}
                 onAddTestCase={handleAddTestCase}
+                locked={!!generatedScript}
+                onUnlock={() => setGeneratedScript(null)}
               />
 
               {generatedScript && (
@@ -426,7 +460,7 @@ ${body}
                 </div>
               )}
 
-              {selectedTCIds.length > 0 && (
+              {selectedTCIds.length > 0 && !generatedScript && (
                 <div className={styles.bottomBar}>
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {selectedTCIds.length} test case

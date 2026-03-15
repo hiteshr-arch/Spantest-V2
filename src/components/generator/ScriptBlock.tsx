@@ -32,35 +32,31 @@ function ScriptBlock({ script }: ScriptBlockProps) {
     <div
       style={{
         marginTop: 20,
-        borderRadius: 14,
-        border: '1px solid rgba(124, 58, 237, 0.12)',
+        borderRadius: 12,
+        border: '1px solid var(--border)',
         overflow: 'hidden',
-        boxShadow: 'var(--shadow-md)',
       }}
     >
-      {/* Header bar — light to match app chrome */}
+      {/* Header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '10px 16px',
-          borderBottom: '1px solid rgba(124, 58, 237, 0.1)',
-          background: 'var(--surface)',
+          padding: '9px 14px',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--surface-raised)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', gap: 5 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 999, background: '#fca5a5' }} />
-            <span style={{ width: 10, height: 10, borderRadius: 999, background: '#fde68a' }} />
-            <span style={{ width: 10, height: 10, borderRadius: 999, background: '#86efac' }} />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 4l4 3-4 3M8 10h4" stroke="var(--accent)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <span
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 11.5,
               color: 'var(--text-muted)',
-              marginLeft: 6,
             }}
           >
             test-script.ts
@@ -74,9 +70,9 @@ function ScriptBlock({ script }: ScriptBlockProps) {
               height: 26,
               padding: '0 12px',
               borderRadius: 7,
-              border: copied ? '1px solid var(--green)' : '1px solid var(--border-mid)',
-              background: copied ? 'var(--green-bg)' : 'var(--surface-raised)',
-              color: copied ? 'var(--green)' : 'var(--text-secondary)',
+              border: copied ? '1px solid #16a34a' : '1px solid var(--border-mid)',
+              background: copied ? 'rgba(22,163,74,0.08)' : 'transparent',
+              color: copied ? '#16a34a' : 'var(--text-secondary)',
               fontSize: 11,
               fontWeight: 600,
               cursor: 'pointer',
@@ -95,7 +91,7 @@ function ScriptBlock({ script }: ScriptBlockProps) {
               padding: '0 12px',
               borderRadius: 7,
               border: '1px solid var(--border-mid)',
-              background: 'var(--surface-raised)',
+              background: 'transparent',
               color: 'var(--text-secondary)',
               fontSize: 11,
               fontWeight: 600,
@@ -109,14 +105,14 @@ function ScriptBlock({ script }: ScriptBlockProps) {
         </div>
       </div>
 
-      {/* Code block — intentionally dark for contrast */}
+      {/* Code */}
       <pre
         style={{
           margin: 0,
-          padding: '16px 18px',
+          padding: '14px 16px',
           fontFamily: 'var(--font-mono)',
-          fontSize: 12.5,
-          lineHeight: 1.75,
+          fontSize: 12,
+          lineHeight: 1.7,
           color: '#cbd5e1',
           overflowX: 'auto',
           whiteSpace: 'pre',
