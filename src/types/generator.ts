@@ -1,4 +1,5 @@
-export type GeneratorStep = 1 | 2 | 3 | 4
+export type GeneratorStep = 1 | 2 | 3 | 4 | 5
+export type GenerateMode = 'scenarios' | 'direct'
 
 export interface TestStep {
   n: number
@@ -16,11 +17,13 @@ export interface TestCase {
   tags?: string
 }
 
-export interface Scenario {
+export interface ScenarioSummary {
   id: string
   name: string
   priority: 'Low' | 'Medium' | 'High'
   description: string
-  testCase: TestCase
 }
 
+export interface Scenario extends ScenarioSummary {
+  testCase: TestCase
+}
