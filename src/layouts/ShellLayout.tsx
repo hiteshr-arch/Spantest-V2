@@ -40,11 +40,7 @@ function ShellLayout() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const goToProject = (path: string) => {
-    navigate(`/project/${activeProjectId}/${path}`)
-  }
-
-  const isProjectRoute = location.pathname.startsWith('/project/')
+const isProjectRoute = location.pathname.startsWith('/project/')
 
   return (
     <Layout className={styles.shell}>

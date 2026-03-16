@@ -85,8 +85,8 @@ function DashboardPage() {
     if (activeStep === 0) {
       return (
         <>
-          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: ‘var(--surface-raised)’, border: ‘1px solid var(--border)’ }}>
-            <Text strong>Hey there!</Text> Let’s create your project. What’s the project name?
+          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: 'var(--surface-raised)', border: '1px solid var(--border)' }}>
+            <Text strong>Hey there!</Text> Let's create your project. What's the project name?
           </div>
           <Form.Item
             name="name"
