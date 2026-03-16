@@ -1,7 +1,7 @@
 import { Drawer, Layout } from 'antd'
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useSpantestStore } from '../store/useSpantestStore'
+import { useAppSelector } from '../store/hooks'
 import styles from './ShellLayout.module.scss'
 import TokenBadge from '../components/ui/TokenBadge'
 
@@ -21,8 +21,8 @@ const DEFAULT_PROJECT_ID = 'ecommerce-app'
 
 function ShellLayout() {
   const [profileOpen, setProfileOpen] = useState(false)
-  const projects = useSpantestStore((s) => s.projects)
-  const tokens = useSpantestStore((s) => s.tokens)
+  const projects = useAppSelector((s) => s.spantest.projects)
+  const tokens = useAppSelector((s) => s.spantest.tokens)
   const params = useParams()
 
   const activeProjectId = params.projectId ?? DEFAULT_PROJECT_ID

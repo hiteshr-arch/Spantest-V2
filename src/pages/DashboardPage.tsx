@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, Modal, Select, Steps, Typography, Form, message } from 'antd'
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons'
-import { useSpantestStore } from '../store/useSpantestStore'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { addProject, setActiveProject } from '../store/spantestSlice'
 import StatCard from '../components/ui/StatCard'
 import ProjectCard from '../components/ui/ProjectCard'
 import styles from './DashboardPage.module.scss'
@@ -14,9 +15,8 @@ const FRAMEWORK_OPTIONS = ['Playwright', 'Cypress', 'Jest', 'Selenium']
 
 function DashboardPage() {
   const navigate = useNavigate()
-  const projects = useSpantestStore((s) => s.projects)
-  const addProject = useSpantestStore((s) => s.addProject)
-  const setActiveProject = useSpantestStore((s) => s.setActiveProject)
+  const dispatch = useAppDispatch()
+  const projects = useAppSelector((s) => s.spantest.projects)
   const [query, setQuery] = useState('')
   const [newProjectModalVisible, setNewProjectModalVisible] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
@@ -64,8 +64,8 @@ function DashboardPage() {
         status: 'active' as const,
       }
 
-      addProject(payload)
-      setActiveProject(payload.id)
+      dispatch(addProject(payload))
+      dispatch(setActiveProject(payload.id))
       closeNewProjectFlow()
       setActiveStep(0)
       form.resetFields()

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Input, Tag, Typography } from 'antd'
 import { listJiraTickets, getTicketStory } from '../services/jiraApi'
-import { useSpantestStore } from '../store/useSpantestStore'
+import { useAppDispatch } from '../store/hooks'
+import { setGeneratorStep } from '../store/spantestSlice'
 
 const { Title, Text } = Typography
 
@@ -17,7 +18,7 @@ function JiraPage() {
   const [tickets, setTickets] = useState<TicketView[]>([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { setGeneratorStep } = useSpantestStore()
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +33,7 @@ function JiraPage() {
   const handleImport = async (key: string) => {
     const story = await getTicketStory(key)
     window.sessionStorage.setItem('spantest:jira-story', story)
-    setGeneratorStep(1)
+    dispatch(setGeneratorStep(1))
     navigate('/project/ecommerce-app/generator')
   }
 

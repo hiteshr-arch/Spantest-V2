@@ -1,4 +1,5 @@
-import { useSpantestStore } from '../store/useSpantestStore'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { adjustTokens } from '../store/spantestSlice'
 import styles from './TokensPage.module.scss'
 
 // ─── Icon helpers ────────────────────────────────────────────────────────────
@@ -92,7 +93,8 @@ function ActivityIcon({ type }: { type: string }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 function TokensPage() {
-  const { tokens, adjustTokens } = useSpantestStore()
+  const dispatch = useAppDispatch()
+  const tokens = useAppSelector((s) => s.spantest.tokens)
 
   const usedPct = Math.round((760 / 1000) * 100)
   const balancePct = Math.round((tokens / 10000) * 100)
@@ -213,7 +215,7 @@ function TokensPage() {
             <div className={styles.pricingPrice}>$4.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={styles.pricingPer}>$0.010 / token</div>
-            <button className={styles.buyBtn} onClick={() => adjustTokens(500)}>Buy Starter</button>
+            <button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(500))}>Buy Starter</button>
             <div className={styles.pricingNote}>Great for trying out the platform</div>
           </div>
 
@@ -226,7 +228,7 @@ function TokensPage() {
             <div className={`${styles.pricingPrice} ${styles.pricingPriceAccent}`}>$14.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={`${styles.pricingPer} ${styles.pricingPerAccent}`}>$0.0075 / token</div>
-            <button className={`${styles.buyBtn} ${styles.buyBtnPrimary}`} onClick={() => adjustTokens(2000)}>Buy Pro Pack</button>
+            <button className={`${styles.buyBtn} ${styles.buyBtnPrimary}`} onClick={() => dispatch(adjustTokens(2000))}>Buy Pro Pack</button>
             <div className={styles.pricingNote}>Most popular for individual devs</div>
           </div>
 
@@ -238,7 +240,7 @@ function TokensPage() {
             <div className={styles.pricingPrice}>$49.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={styles.pricingPer}>$0.0050 / token</div>
-            <button className={styles.buyBtn} onClick={() => adjustTokens(10000)}>Buy Team</button>
+            <button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(10000))}>Buy Team</button>
             <div className={styles.pricingNote}>Best value for teams &amp; power users</div>
           </div>
         </div>
