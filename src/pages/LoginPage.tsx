@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { Button, Form, Input } from 'antd'
+import { Button, Card, Divider, Form, Input } from 'antd'
+import styles from './LoginPage.module.scss'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -9,120 +10,44 @@ function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg)',
-      }}
-    >
-      {/* Card */}
-      <div
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 20,
-          padding: '44px 40px 36px',
-          width: 400,
-          boxShadow: 'var(--shadow-lg)',
-        }}
-      >
+    <div className={styles.page}>
+      <Card className={styles.card} styles={{ body: { padding: '44px 40px 36px' } }}>
+
         {/* Logo mark + wordmark */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 48,
-              height: 48,
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-              boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
-              marginBottom: 14,
-            }}
-          >
+        <div className={styles.logoSection}>
+          <div className={styles.logoIcon}>
             <svg width="24" height="24" viewBox="0 0 22 22" fill="none" aria-hidden="true">
               <path d="M4 11l5 5L18 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 24,
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
-              color: 'var(--text-primary)',
-              marginBottom: 5,
-            }}
-          >
-            Spantest
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Sign in to your QA workspace
-          </div>
+          <div className={styles.logoTitle}>Spantest</div>
+          <div className={styles.logoSub}>Sign in to your QA workspace</div>
         </div>
 
         {/* Form */}
-        <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
-          <Form.Item
-            label={
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Email
-              </span>
-            }
-            name="email"
-            initialValue="james.doe@company.com"
-          >
-            <Input
-              size="large"
-              placeholder="you@company.com"
-              style={{ borderRadius: 10 }}
-            />
+        <Form layout="vertical" onFinish={onFinish} requiredMark={false} className={styles.form}>
+          <Form.Item label="Email" name="email" initialValue="james.doe@company.com">
+            <Input size="large" placeholder="you@company.com" />
           </Form.Item>
 
-          <Form.Item
-            label={
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Password
-              </span>
-            }
-            name="password"
-            initialValue="password"
-            style={{ marginBottom: 6 }}
-          >
-            <Input.Password
-              size="large"
-              placeholder="••••••••"
-              style={{ borderRadius: 10 }}
-            />
+          <Form.Item label="Password" name="password" initialValue="password">
+            <Input.Password size="large" placeholder="••••••••" />
           </Form.Item>
 
           {/* Forgot password */}
-          <div style={{ textAlign: 'right', marginBottom: 18 }}>
-            <button
-              type="button"
-              style={{ border: 'none', background: 'transparent', fontSize: 12, color: 'var(--accent)', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
-            >
+          <div className={styles.forgotWrapper}>
+            <Button type="link" className={styles.forgotBtn}>
               Forgot password?
-            </button>
+            </Button>
           </div>
 
-          <Form.Item style={{ marginBottom: 10 }}>
+          <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               block
               size="large"
-              style={{
-                borderRadius: 10,
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                letterSpacing: '0.01em',
-                height: 44,
-              }}
+              className={styles.signInBtn}
             >
               Sign in
             </Button>
@@ -130,50 +55,20 @@ function LoginPage() {
         </Form>
 
         {/* Divider */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            margin: '12px 0 16px',
-            fontSize: 12,
-            color: 'var(--text-muted)',
-          }}
-        >
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span>or continue with</span>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-        </div>
+        <Divider plain className={styles.divider}>or continue with</Divider>
 
-        <Button
-          block
-          size="large"
-          onClick={onFinish}
-          style={{ borderRadius: 10, fontFamily: 'var(--font-display)', fontWeight: 600, height: 44 }}
-        >
+        <Button block size="large" onClick={onFinish} className={styles.ssoBtn}>
           Continue with SSO
         </Button>
 
-        <div style={{ textAlign: 'center', fontSize: 12, marginTop: 22, color: 'var(--text-muted)' }}>
+        <div className={styles.signUpWrapper}>
           Don&apos;t have an account?{' '}
-          <button
-            type="button"
-            style={{
-              border: 'none',
-              padding: 0,
-              background: 'transparent',
-              color: 'var(--accent)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: 12,
-              fontFamily: 'inherit',
-            }}
-            onClick={onFinish}
-          >
+          <Button type="link" onClick={onFinish} className={styles.signUpBtn}>
             Sign up →
-          </button>
+          </Button>
         </div>
-      </div>
+
+      </Card>
     </div>
   )
 }

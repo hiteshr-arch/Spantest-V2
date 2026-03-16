@@ -85,7 +85,7 @@ function DashboardPage() {
     if (activeStep === 0) {
       return (
         <>
-          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: '#F4F6FC' }}>
+          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: ‘var(--surface-raised)’, border: ‘1px solid var(--border)’ }}>
             <Text strong>Hey there!</Text> Let’s create your project. What’s the project name?
           </div>
           <Form.Item
@@ -94,8 +94,8 @@ function DashboardPage() {
           >
             <Input placeholder="E.g. Customer Onboarding" />
           </Form.Item>
-          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: '#F4F6FC' }}>
-            Optional: Add a short description.
+          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: 'var(--surface-raised)', border: '1px solid var(--border)' }}>
+Optional: Add a short description.
           </div>
           <Form.Item name="description">
             <Input.TextArea rows={3} placeholder="Project description" />
@@ -107,8 +107,8 @@ function DashboardPage() {
     if (activeStep === 1) {
       return (
         <>
-          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: '#F4F6FC' }}>
-            Great! Now choose a default test framework and quick tags.
+          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: 'var(--surface-raised)', border: '1px solid var(--border)' }}>
+Great! Now choose a default test framework and quick tags.
           </div>
           <Form.Item
             name="framework"
@@ -133,8 +133,8 @@ function DashboardPage() {
       const values = form.getFieldsValue()
       return (
         <>
-          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: '#F4F6FC' }}>
-            Awesome! Review your project details.
+          <div style={{ marginBottom: 12, padding: 10, borderRadius: 12, background: 'var(--surface-raised)', border: '1px solid var(--border)' }}>
+Awesome! Review your project details.
           </div>
           <div style={{ fontSize: 14, marginBottom: 8 }}>
             <b>Name:</b> {values.name || '—'}
@@ -227,7 +227,7 @@ function DashboardPage() {
         open={newProjectModalVisible}
         onCancel={closeNewProjectFlow}
         footer={
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Button disabled={activeStep === 0} onClick={() => setActiveStep((s) => Math.max(0, s - 1))}>
               Back
             </Button>
@@ -253,7 +253,7 @@ function DashboardPage() {
           </div>
         }
       >
-        <Steps current={activeStep} size="small" style={{ marginBottom: 20 }} items={steps.map((item, index) => ({
+        <Steps current={activeStep} size="small" style={{ marginBottom: 24 }} items={steps.map((item, index) => ({
           key: index,
           title: item.title,
         }))} />

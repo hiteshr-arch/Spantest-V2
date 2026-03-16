@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Input, Modal, Select, Table, Tag, Typography, Form, message } from 'antd'
+import styles from './LibraryPage.module.scss'
 
 const { Title, Text } = Typography
 
@@ -140,23 +141,17 @@ function LibraryPage() {
 
   return (
     <div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+      <div className={styles.breadcrumb}>
         Projects / E-Commerce App / Test Library
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 20,
-        }}
-      >
+      <div className={styles.pageHeader}>
         <div>
           <Title level={3} style={{ marginBottom: 4 }}>
             Test Library
           </Title>
-          <Text type="secondary">Saved scenarios, test cases & scripts</Text>
+          <Text type="secondary">Saved scenarios, test cases &amp; scripts</Text>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className={styles.pageActions}>
           <Input
             placeholder="Search tests..."
             style={{ width: 200, height: 36 }}
@@ -172,21 +167,12 @@ function LibraryPage() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 8,
-          marginBottom: 16,
-          alignItems: 'center',
-        }}
-      >
-        <Button size="small" type="primary">
-          All
-        </Button>
+      <div className={styles.filterBar}>
+        <Button size="small" type="primary">All</Button>
         <Button size="small">Scenarios</Button>
         <Button size="small">Test Cases</Button>
         <Button size="small">Scripts</Button>
-        <div style={{ marginLeft: 'auto' }}>
+        <div className={styles.frameworkSelect}>
           <Select
             defaultValue="All frameworks"
             style={{ width: 160, height: 32 }}
@@ -225,7 +211,7 @@ function LibraryPage() {
                     {epic.name}
                   </Tag>
                 ) : (
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
+                  <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
                 )
               },
             },
@@ -242,14 +228,14 @@ function LibraryPage() {
               title: 'Framework',
               dataIndex: 'framework',
               render: (value: string) => (
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value}</span>
+                <Text type="secondary" style={{ fontSize: 12 }}>{value}</Text>
               ),
             },
             {
               title: 'Created',
               dataIndex: 'created',
               render: (value: string) => (
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value}</span>
+                <Text type="secondary" style={{ fontSize: 12 }}>{value}</Text>
               ),
             },
             {
@@ -267,8 +253,8 @@ function LibraryPage() {
             {
               title: 'Actions',
               key: 'actions',
-              render: (_: any, record: LibraryItem) => (
-                <div style={{ display: 'flex', gap: 8 }}>
+              render: (_: unknown, record: LibraryItem) => (
+                <div className={styles.tableActions}>
                   <Button
                     size="small"
                     onClick={(e) => {
@@ -352,4 +338,3 @@ function LibraryPage() {
 }
 
 export default LibraryPage
-

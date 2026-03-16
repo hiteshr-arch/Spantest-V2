@@ -1,3 +1,4 @@
+import { Button } from 'antd'
 import { useAppSelector, useAppDispatch } from '../store/hooks'
 import { adjustTokens } from '../store/spantestSlice'
 import styles from './TokensPage.module.scss'
@@ -109,12 +110,13 @@ function TokensPage() {
           <h1 className={styles.title}>Token Balance</h1>
           <p className={styles.subtitle}>Tokens power every AI feature — scenarios, test cases &amp; scripts</p>
         </div>
-        <button
+        <Button
+          type="primary"
           className={styles.topUpBtn}
           onClick={() => document.getElementById('topup-section')?.scrollIntoView({ behavior: 'smooth' })}
         >
           + Top up tokens
-        </button>
+        </Button>
       </div>
 
       {/* ── Top Stats Row ────────────────────────────────────── */}
@@ -215,7 +217,7 @@ function TokensPage() {
             <div className={styles.pricingPrice}>$4.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={styles.pricingPer}>$0.010 / token</div>
-            <button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(500))}>Buy Starter</button>
+            <Button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(500))}>Buy Starter</Button>
             <div className={styles.pricingNote}>Great for trying out the platform</div>
           </div>
 
@@ -228,7 +230,7 @@ function TokensPage() {
             <div className={`${styles.pricingPrice} ${styles.pricingPriceAccent}`}>$14.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={`${styles.pricingPer} ${styles.pricingPerAccent}`}>$0.0075 / token</div>
-            <button className={`${styles.buyBtn} ${styles.buyBtnPrimary}`} onClick={() => dispatch(adjustTokens(2000))}>Buy Pro Pack</button>
+            <Button type="primary" className={`${styles.buyBtn} ${styles.buyBtnPrimary}`} onClick={() => dispatch(adjustTokens(2000))}>Buy Pro Pack</Button>
             <div className={styles.pricingNote}>Most popular for individual devs</div>
           </div>
 
@@ -240,7 +242,7 @@ function TokensPage() {
             <div className={styles.pricingPrice}>$49.99</div>
             <div className={styles.pricingFreq}>one-time</div>
             <div className={styles.pricingPer}>$0.0050 / token</div>
-            <button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(10000))}>Buy Team</button>
+            <Button className={styles.buyBtn} onClick={() => dispatch(adjustTokens(10000))}>Buy Team</Button>
             <div className={styles.pricingNote}>Best value for teams &amp; power users</div>
           </div>
         </div>
@@ -251,7 +253,7 @@ function TokensPage() {
 
         {/* Recent Activity */}
         <div className={styles.activitySection}>
-          <div className={styles.sectionTitle} style={{ marginBottom: 4 }}>Recent activity</div>
+          <div className={styles.sectionTitle}>Recent activity</div>
           <div className={styles.activityList}>
             {ACTIVITY.map((item, i) => (
               <div key={i} className={styles.activityRow}>
@@ -275,7 +277,7 @@ function TokensPage() {
         </div>
 
         {/* Right column: info banner + token tips */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className={styles.infoColumn}>
           <div className={styles.infoBanner}>
             <span className={styles.infoHighlight}>How tokens work:</span>{' '}
             Each AI action costs tokens — 50 for a full generation batch, 10 for a script, 2 per clarifying question.

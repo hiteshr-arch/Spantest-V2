@@ -1,0 +1,29 @@
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.boardInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.boardMeta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.boardActions {
+  display: flex;
+  gap: 8px;
+}

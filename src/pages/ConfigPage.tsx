@@ -1,6 +1,6 @@
-import { Button, Card, Form, Input, Select, Typography } from 'antd'
+import { Button, Card, Form, Input, Select, Tag, Typography } from 'antd'
 
-const { Title, Text } = Typography
+const { Title } = Typography
 
 function ConfigPage() {
   return (
@@ -15,8 +15,7 @@ function ConfigPage() {
       <div style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Card
           title="Project details"
-          headStyle={{ paddingInline: 18, paddingBlock: 14, fontSize: 13 }}
-          bodyStyle={{ padding: 20 }}
+          styles={{ header: { paddingInline: 18, paddingBlock: 14, fontSize: 13 }, body: { padding: 20 } }}
         >
           <Form layout="vertical" initialValues={{ name: 'E-Commerce App' }}>
             <Form.Item label="Project name" name="name">
@@ -44,13 +43,12 @@ function ConfigPage() {
           title={
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Project files</span>
-              <Text type="secondary" style={{ fontSize: 11 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>
                 Used as context for AI generation
-              </Text>
+              </span>
             </div>
           }
-          headStyle={{ paddingInline: 18, paddingBlock: 14, fontSize: 13 }}
-          bodyStyle={{ padding: 20 }}
+          styles={{ header: { paddingInline: 18, paddingBlock: 14, fontSize: 13 }, body: { padding: 20 } }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
             {['checkout-flow.pdf', 'api-spec-v2.yaml', 'product-requirements.docx'].map(
@@ -82,20 +80,11 @@ function ConfigPage() {
 
         <Card
           title="Jira integration"
-          headStyle={{ paddingInline: 18, paddingBlock: 14, fontSize: 13 }}
-          bodyStyle={{ padding: 20 }}
+          styles={{ header: { paddingInline: 18, paddingBlock: 14, fontSize: 13 }, body: { padding: 20 } }}
           extra={
-            <span
-              style={{
-                borderRadius: 999,
-                padding: '0 10px',
-                fontSize: 11,
-                border: '1px solid var(--green)',
-                color: 'var(--green)',
-              }}
-            >
+            <Tag color="success" style={{ borderRadius: 999 }}>
               ● Connected
-            </span>
+            </Tag>
           }
         >
           <Form layout="vertical">
@@ -121,4 +110,3 @@ function ConfigPage() {
 }
 
 export default ConfigPage
-

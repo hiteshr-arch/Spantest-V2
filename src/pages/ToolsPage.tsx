@@ -1,28 +1,29 @@
-import { Card, Typography } from 'antd';
+import { Button, Card, Typography } from 'antd'
+import styles from './ToolsPage.module.scss'
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph } = Typography
 
 function ToolsPage() {
   return (
-    <div style={{ padding: 32 }}>
+    <div className={styles.page}>
       <Title level={3}>Tools</Title>
       <Paragraph>Choose a tool below:</Paragraph>
-      <div style={{ display: 'flex', gap: 24 }}>
-        <Card title="Screen Recorder" style={{ width: 300 }}>
+      <div className={styles.cardsRow}>
+        <Card title="Screen Recorder" className={styles.card}>
           <Paragraph>
             Record your screen and automatically generate scripts for testing.
           </Paragraph>
-          <button style={{ marginTop: 8 }}>Start Recording</button>
+          <Button style={{ marginTop: 8 }}>Start Recording</Button>
         </Card>
-        <Card title="Keyword Locator" style={{ width: 300 }}>
+        <Card title="Keyword Locator" className={styles.card}>
           <Paragraph>
             Find keywords and locate elements for test automation.
           </Paragraph>
-          <button style={{ marginTop: 8 }}>Find Keywords</button>
+          <Button style={{ marginTop: 8 }}>Find Keywords</Button>
         </Card>
       </div>
     </div>
-  );
+  )
 }
 
-export default ToolsPage;
+export default ToolsPage

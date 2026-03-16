@@ -4,6 +4,7 @@ import { Button, Card, Input, Tag, Typography } from 'antd'
 import { listJiraTickets, getTicketStory } from '../services/jiraApi'
 import { useAppDispatch } from '../store/hooks'
 import { setGeneratorStep } from '../store/spantestSlice'
+import styles from './JiraPage.module.scss'
 
 const { Title, Text } = Typography
 
@@ -39,16 +40,10 @@ function JiraPage() {
 
   return (
     <div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+      <div className={styles.breadcrumb}>
         Projects / E-Commerce App / Jira Import
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 8,
-        }}
-      >
+      <div className={styles.pageHeader}>
         <div>
           <Title level={3} style={{ marginBottom: 4 }}>
             Import from Jira
@@ -59,17 +54,11 @@ function JiraPage() {
           ● Connected
         </Tag>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 14,
-        }}
-      >
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+      <div className={styles.boardInfo}>
+        <span className={styles.boardMeta}>
           Board: E-Commerce Sprint 14 · {tickets.length} open tickets · Last synced 5 min ago
         </span>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className={styles.boardActions}>
           <Input placeholder="Search Jira tickets..." style={{ width: 240, height: 36 }} />
           <Button>Refresh</Button>
         </div>
@@ -84,19 +73,9 @@ function JiraPage() {
           onClick={() => handleImport(t.key)}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 500,
-                color: 'var(--text-muted)',
-                background: '#f5f5f5',
-                border: '1px solid var(--border)',
-                borderRadius: 4,
-                padding: '3px 7px',
-              }}
-            >
+            <Tag bordered style={{ borderRadius: 4, fontSize: 10, fontWeight: 500 }}>
               {t.key}
-            </span>
+            </Tag>
             <Tag
               color={t.type === 'Bug' ? 'red' : t.type === 'Task' ? 'default' : 'processing'}
               style={{ borderRadius: 999, fontSize: 10 }}
@@ -127,4 +106,3 @@ function JiraPage() {
 }
 
 export default JiraPage
-

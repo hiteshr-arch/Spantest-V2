@@ -4,6 +4,141 @@
   gap: 20px;
 }
 
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.generatingState {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.generatingIcon {
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.generatingTokenCost {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+.emptyState {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.2;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.emptySub {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.tcHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.tcHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tcCountDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--green);
+}
+
+.clarifyModeWrapper {
+  margin-bottom: 14px;
+}
+
+.clarifyModeLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.clarifyModeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clarifyOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid var(--border, rgba(124, 58, 237, 0.12));
+  background: transparent;
+
+  &.clarifyOptionSelected {
+    border-color: var(--accent, #7c3aed);
+    background: var(--accent-subtle, rgba(124, 58, 237, 0.05));
+  }
+}
+
+.clarifyOptLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 18px;
+}
+
+.clarifyOptSub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.panelHeaderLabel {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.manualAddIcon {
+  font-size: 16px;
+  color: #ccc;
+}
+
+.manualAddSuffix {
+  font-size: 11px;
+  color: #bbb;
+  margin-left: auto;
+}
+
 .stepsBar {
   display: flex;
   align-items: center;

@@ -69,7 +69,6 @@ function GeneratorPage() {
     }
   }, [generatorStep, dispatch])
 
-  // Combine AI-generated and manually added test cases
   const [manualTestCases, setManualTestCases] = useState<TestCase[]>([])
   const testCases: TestCase[] = useMemo(
     () => [...scenarios.map((s) => s.testCase), ...manualTestCases],
@@ -236,7 +235,6 @@ ${body}
     }, 300)
   }
 
-  // Step bar configuration depends on mode
   const stepBarItems: { label: string; step: GeneratorStep }[] =
     generateMode === 'scenarios'
       ? [
@@ -253,17 +251,16 @@ ${body}
           { label: 'Review', step: 5 },
         ]
 
-
   return (
     <div className={styles.root}>
       <div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+        <div className={styles.breadcrumb}>
           Projects / {projectId.replace(/-/g, ' ')} / Generator
         </div>
         <Title level={3} style={{ marginBottom: 4 }}>
           Generator
         </Title>
-        <Text type="secondary">Turn user stories into test cases & scripts</Text>
+        <Text type="secondary">Turn user stories into test cases &amp; scripts</Text>
       </div>
 
       {/* ── Step bar ─────────────────────────────────────── */}
@@ -283,7 +280,7 @@ ${body}
         <div>
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <span style={{ fontSize: 13, fontWeight: 500 }}>Input</span>
+              <span className={styles.panelHeaderLabel}>Input</span>
               {isInputCollapsed ? (
                 <Button
                   type="text"
@@ -331,7 +328,7 @@ ${body}
                   <Form.Item label="User story / prompt" name="story" style={{ marginBottom: 16 }}>
                     <TextArea rows={5} placeholder="As a user, I want to…" />
                   </Form.Item>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className={styles.formGrid}>
                     <Form.Item label="Framework" name="framework">
                       <Select options={FRAMEWORK_OPTIONS.map((f) => ({ value: f, label: f }))} />
                     </Form.Item>
@@ -362,28 +359,18 @@ ${body}
               <div className={styles.clarifyTitle}>AI Clarification</div>
 
               {/* Generate mode radio */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              <div className={styles.clarifyModeWrapper}>
+                <div className={styles.clarifyModeLabel}>
                   How would you like to generate?
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className={styles.clarifyModeOptions}>
                   {[
                     { value: 'scenarios' as const, label: 'Scenarios first', sub: 'Review & refine scenarios, then generate test cases' },
                     { value: 'direct' as const, label: 'Test cases directly', sub: 'Skip scenarios and generate test cases right away' },
                   ].map((opt) => (
                     <label
                       key={opt.value}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: 10,
-                        padding: '10px 12px',
-                        borderRadius: 10,
-                        border: `1.5px solid ${generateMode === opt.value ? 'var(--accent, #7c3aed)' : 'var(--border, rgba(124,58,237,0.12))'}`,
-                        background: generateMode === opt.value ? 'var(--accent-subtle, rgba(124,58,237,0.05))' : 'transparent',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
-                      }}
+                      className={`${styles.clarifyOption} ${generateMode === opt.value ? styles.clarifyOptionSelected : ''}`}
                     >
                       <input
                         type="radio"
@@ -394,12 +381,8 @@ ${body}
                         style={{ marginTop: 2, accentColor: 'var(--accent, #7c3aed)', flexShrink: 0 }}
                       />
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: '18px' }}>
-                          {opt.label}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                          {opt.sub}
-                        </div>
+                        <div className={styles.clarifyOptLabel}>{opt.label}</div>
+                        <div className={styles.clarifyOptSub}>{opt.sub}</div>
                       </div>
                     </label>
                   ))}
@@ -440,9 +423,9 @@ ${body}
             className={styles.manualAdd}
             onClick={handleAddTestCase}
           >
-            <span style={{ fontSize: 16, color: '#ccc' }}>+</span>
+            <span className={styles.manualAddIcon}>+</span>
             Add test case manually
-            <span style={{ fontSize: 11, color: '#bbb', marginLeft: 'auto' }}>
+            <span className={styles.manualAddSuffix}>
               No AI · No tokens
             </span>
           </button>
@@ -451,8 +434,8 @@ ${body}
         {/* ── Right panel ──────────────────────────────────── */}
         <div className={styles.panel}>
           {isGenerating && (
-            <div style={{ padding: '60px 24px', textAlign: 'center' }}>
-              <div style={{ marginBottom: 12, fontSize: 24 }}>⋯</div>
+            <div className={styles.generatingState}>
+              <div className={styles.generatingIcon}>⋯</div>
               <Text type="secondary">
                 {generatorStep === 3
                   ? generateMode === 'scenarios'
@@ -460,7 +443,7 @@ ${body}
                     : 'Generating test cases…'
                   : 'Generating test cases from scenario…'}
               </Text>
-              <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>
+              <div className={styles.generatingTokenCost}>
                 Using {TOKEN_COSTS.generateBatch} tokens
               </div>
             </div>
@@ -469,11 +452,9 @@ ${body}
           {/* Empty state */}
           {!isGenerating && !scenarios.length && !scenarioSummaries.length && (
             <div className={styles.outputEmpty}>
-              <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.2 }}>⚡</div>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>
-                No output yet
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
+              <div className={styles.emptyIcon}>⚡</div>
+              <div className={styles.emptyTitle}>No output yet</div>
+              <div className={styles.emptySub}>
                 Write a user story and click Generate Tests
               </div>
             </div>
@@ -543,21 +524,22 @@ ${body}
                   </div>
                 </div>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 999, background: 'var(--green)' }} />
+              <div className={styles.tcHeader}>
+                <div className={styles.tcHeaderLeft}>
+                  <span className={styles.tcCountDot} />
                   <Text type="secondary">
                     {testCases.length} test cases · {tokens} tokens remaining
                   </Text>
                 </div>
                 {generateMode === 'scenarios' && (
-                  <button
-                    type="button"
+                  <Button
+                    type="link"
+                    size="small"
                     onClick={() => dispatch(setGeneratorStep(4))}
-                    style={{ fontSize: 12, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}
+                    style={{ padding: 0, fontSize: 12, fontWeight: 600 }}
                   >
                     ← Back to scenarios
-                  </button>
+                  </Button>
                 )}
               </div>
 

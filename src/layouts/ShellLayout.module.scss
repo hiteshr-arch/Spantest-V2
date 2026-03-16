@@ -149,6 +149,177 @@
   padding: 28px 36px;
 }
 
+// ── Project selector ──────────────────────────────────────────────
+
+.projectSelectorWrapper {
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.projectLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+// ── Profile Drawer ─────────────────────────────────────────────────
+
+.drawerHeader {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 60%, #5b21b6 100%);
+  padding: 28px 24px 20px;
+  position: relative;
+}
+
+.drawerClose {
+  position: absolute !important;
+  top: 14px;
+  right: 14px;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  padding: 0 !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+  }
+}
+
+.drawerAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.drawerName {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+
+.drawerEmail {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 2px;
+}
+
+.drawerRole {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.drawerBody {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawerStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.drawerStatPill {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.pillLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.pillValue {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.pillValueAccent {
+  color: var(--accent);
+}
+
+.pillSub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.drawerInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.infoLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.infoValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.drawerNavLinks {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawerNavBtn {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  height: 40px !important;
+  padding: 0 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+
+  &:hover {
+    background: var(--accent-subtle) !important;
+    color: var(--accent) !important;
+  }
+}
+
+.drawerDivider {
+  margin: 8px 0 !important;
+}
+
+// ── Legacy / page helpers ──────────────────────────────────────────
+
 .breadcrumb {
   font-size: 11.5px;
   color: var(--text-faint);

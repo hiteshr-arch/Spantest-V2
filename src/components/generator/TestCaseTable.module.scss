@@ -1,0 +1,117 @@
+// ── Toolbar ───────────────────────────────────────────────────────────────────
+
+.toolbar {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+// ── Cell text ─────────────────────────────────────────────────────────────────
+
+.cellName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 22px;
+}
+
+.cellNameEmpty {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 22px;
+}
+
+.cellText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 22px;
+}
+
+.cellEmpty {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 22px;
+}
+
+// ── Action buttons ─────────────────────────────────────────────────────────────
+
+.actionBtn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.actionBtnAccent {
+  @extend .actionBtn;
+
+  &:hover {
+    color: var(--accent) !important;
+    background: var(--accent-subtle) !important;
+    border-color: var(--accent-border) !important;
+  }
+}
+
+.actionBtnDanger {
+  @extend .actionBtn;
+
+  &:hover {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.09) !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+  }
+}
+
+.actionBtnSuccess {
+  @extend .actionBtn;
+  color: #16a34a;
+
+  &:hover {
+    color: #16a34a !important;
+    background: rgba(22, 163, 74, 0.1) !important;
+    border-color: rgba(22, 163, 74, 0.3) !important;
+  }
+}
+
+.actionBtnNeutral {
+  @extend .actionBtn;
+
+  &:hover {
+    color: var(--text-secondary) !important;
+    background: rgba(100, 100, 120, 0.08) !important;
+    border-color: rgba(100, 100, 120, 0.2) !important;
+  }
+}
+
+.actionGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.lockedCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  opacity: 0.4;
+}
+
+// ── Expanded steps row ────────────────────────────────────────────────────────
+
+.stepsWrapper {
+  padding: 10px 16px 16px;
+}
