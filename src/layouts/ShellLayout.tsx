@@ -190,7 +190,7 @@ const isProjectRoute = location.pathname.startsWith('/project/')
                 `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
               }
             >
-              □ Test Library
+              □ Repository
             </NavLink>
             <NavLink
               to={`/project/${activeProjectId}/jira`}

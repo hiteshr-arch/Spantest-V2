@@ -1,6 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { GeneratorStep, GenerateMode, Scenario, ScenarioSummary } from '../types/generator'
+import type {
+  Scenario,
+  ScenarioSummary,
+  ConversationStage,
+  TestType,
+  GenerateType,
+  ArtifactKind,
+  ChatMessage,
+  RepositoryFolder,
+  RepositoryItem,
+} from '../types/generator'
 
 interface ProjectSummary {
   id: string
@@ -14,13 +24,20 @@ interface SpantestState {
   tokens: number
   activeProjectId: string
   projects: ProjectSummary[]
-  generateMode: GenerateMode
-  generatorStep: GeneratorStep
   scenarioSummaries: ScenarioSummary[]
   selectedScenarioIds: string[]
   scenarios: Scenario[]
   selectedTCIds: string[]
   generatedScript: string | null
+  // ─── Chat / Conversation ───────────────────────────────────────────
+  conversationStage: ConversationStage
+  chatMessages: ChatMessage[]
+  testType: TestType | null
+  generateType: GenerateType | null
+  artifactKind: ArtifactKind
+  // ─── Repository ────────────────────────────────────────────────────
+  repositoryFolders: RepositoryFolder[]
+  repositoryItems: RepositoryItem[]
 }
 
 const INITIAL_PROJECTS: ProjectSummary[] = [
@@ -51,13 +68,18 @@ const initialState: SpantestState = {
   tokens: 240,
   activeProjectId: 'ecommerce-app',
   projects: INITIAL_PROJECTS,
-  generateMode: 'scenarios',
-  generatorStep: 1,
   scenarioSummaries: [],
   selectedScenarioIds: [],
   scenarios: [],
   selectedTCIds: [],
   generatedScript: null,
+  conversationStage: 'idle',
+  chatMessages: [],
+  testType: null,
+  generateType: null,
+  artifactKind: null,
+  repositoryFolders: [],
+  repositoryItems: [],
 }
 
 const spantestSlice = createSlice({
@@ -78,12 +100,6 @@ const spantestSlice = createSlice({
     },
     addProject(state, action: PayloadAction<ProjectSummary>) {
       state.projects = [action.payload, ...state.projects]
-    },
-    setGenerateMode(state, action: PayloadAction<GenerateMode>) {
-      state.generateMode = action.payload
-    },
-    setGeneratorStep(state, action: PayloadAction<GeneratorStep>) {
-      state.generatorStep = action.payload
     },
     setScenarioSummaries(state, action: PayloadAction<ScenarioSummary[]>) {
       state.scenarioSummaries = action.payload
@@ -129,6 +145,58 @@ const spantestSlice = createSlice({
     setGeneratedScript(state, action: PayloadAction<string | null>) {
       state.generatedScript = action.payload
     },
+    // ─── Chat / Conversation ─────────────────────────────────────────
+    addChatMessage(state, action: PayloadAction<ChatMessage>) {
+      state.chatMessages.push(action.payload)
+    },
+    setConversationStage(state, action: PayloadAction<ConversationStage>) {
+      state.conversationStage = action.payload
+    },
+    setTestType(state, action: PayloadAction<TestType>) {
+      state.testType = action.payload
+    },
+    setGenerateType(state, action: PayloadAction<GenerateType>) {
+      state.generateType = action.payload
+    },
+    setArtifactKind(state, action: PayloadAction<ArtifactKind>) {
+      state.artifactKind = action.payload
+    },
+    resetConversation(state) {
+      state.chatMessages = []
+      state.conversationStage = 'idle'
+      state.testType = null
+      state.generateType = null
+      state.artifactKind = null
+      state.scenarioSummaries = []
+      state.selectedScenarioIds = []
+      state.scenarios = []
+      state.selectedTCIds = []
+      state.generatedScript = null
+    },
+    // ─── Repository ──────────────────────────────────────────────────
+    addRepositoryFolder(state, action: PayloadAction<RepositoryFolder>) {
+      state.repositoryFolders.push(action.payload)
+    },
+    deleteRepositoryFolder(state, action: PayloadAction<string>) {
+      state.repositoryFolders = state.repositoryFolders.filter((f) => f.id !== action.payload)
+      state.repositoryItems = state.repositoryItems.map((item) =>
+        item.folderId === action.payload ? { ...item, folderId: null } : item
+      )
+    },
+    renameRepositoryFolder(state, action: PayloadAction<{ id: string; name: string }>) {
+      const folder = state.repositoryFolders.find((f) => f.id === action.payload.id)
+      if (folder) folder.name = action.payload.name
+    },
+    addRepositoryItems(state, action: PayloadAction<RepositoryItem[]>) {
+      state.repositoryItems.push(...action.payload)
+    },
+    deleteRepositoryItem(state, action: PayloadAction<string>) {
+      state.repositoryItems = state.repositoryItems.filter((item) => item.id !== action.payload)
+    },
+    moveRepositoryItem(state, action: PayloadAction<{ id: string; folderId: string | null }>) {
+      const item = state.repositoryItems.find((i) => i.id === action.payload.id)
+      if (item) item.folderId = action.payload.folderId
+    },
   },
 })
 
@@ -138,8 +206,6 @@ export const {
   setActiveProject,
   setProjects,
   addProject,
-  setGenerateMode,
-  setGeneratorStep,
   setScenarioSummaries,
   addScenarioSummary,
   updateScenarioSummary,
@@ -150,6 +216,18 @@ export const {
   toggleTestCaseSelected,
   clearSelectedTestCases,
   setGeneratedScript,
+  addChatMessage,
+  setConversationStage,
+  setTestType,
+  setGenerateType,
+  setArtifactKind,
+  resetConversation,
+  addRepositoryFolder,
+  deleteRepositoryFolder,
+  renameRepositoryFolder,
+  addRepositoryItems,
+  deleteRepositoryItem,
+  moveRepositoryItem,
 } = spantestSlice.actions
 
 export default spantestSlice.reducer

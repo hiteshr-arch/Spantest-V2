@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button, Card, Input, Tag, Typography } from 'antd'
 import { listJiraTickets, getTicketStory } from '../services/jiraApi'
 import { useAppDispatch } from '../store/hooks'
-import { setGeneratorStep } from '../store/spantestSlice'
+import { resetConversation } from '../store/spantestSlice'
 import styles from './JiraPage.module.scss'
 
 const { Title, Text } = Typography
@@ -34,7 +34,7 @@ function JiraPage() {
   const handleImport = async (key: string) => {
     const story = await getTicketStory(key)
     window.sessionStorage.setItem('spantest:jira-story', story)
-    dispatch(setGeneratorStep(1))
+    dispatch(resetConversation())
     navigate('/project/ecommerce-app/generator')
   }
 

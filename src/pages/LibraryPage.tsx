@@ -1,340 +1,371 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button, Card, Input, Modal, Select, Table, Tag, Typography, Form, message } from 'antd'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Button, Card, Input, Modal, Select, Table, Tag, Typography, message } from 'antd'
+import { FolderOutlined, FolderOpenOutlined, DeleteOutlined } from '@ant-design/icons'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import {
+  addRepositoryFolder,
+  deleteRepositoryFolder,
+  renameRepositoryFolder,
+  deleteRepositoryItem,
+  moveRepositoryItem,
+} from '../store/spantestSlice'
+import type { RepositoryItem } from '../types/generator'
+import ItemViewDrawer from '../components/repository/ItemViewDrawer'
 import styles from './LibraryPage.module.scss'
 
 const { Title, Text } = Typography
 
-interface LibraryItem {
-  key: string
-  name: string
-  type: 'Scenario' | 'Test Case' | 'Script'
-  framework: string
-  created: string
-  status: 'Ready' | 'Draft'
-  epicId?: string
+const TYPE_FILTER_OPTIONS = ['All', 'Scenarios', 'Test Cases', 'Scripts'] as const
+type TypeFilter = typeof TYPE_FILTER_OPTIONS[number]
+
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
 }
 
-interface Epic {
-  id: string
-  name: string
-  itemKeys: string[]
-}
-
-const MOCK_ITEMS: LibraryItem[] = [
-  {
-    key: '1',
-    name: 'User checkout — happy path',
-    type: 'Script',
-    framework: 'Playwright',
-    created: '2d ago',
-    status: 'Ready',
-  },
-  {
-    key: '2',
-    name: 'Login — invalid credentials',
-    type: 'Test Case',
-    framework: 'Cypress',
-    created: '3d ago',
-    status: 'Ready',
-  },
-  {
-    key: '3',
-    name: 'Product search edge cases',
-    type: 'Scenario',
-    framework: '—',
-    created: '5d ago',
-    status: 'Draft',
-  },
-]
-
-function LibraryPage() {
+function RepositoryPage() {
   const navigate = useNavigate()
-  const [items, setItems] = useState<LibraryItem[]>(MOCK_ITEMS)
-  const [epics, setEpics] = useState<Epic[]>([])
+  const params = useParams()
+  const projectId = params.projectId ?? 'ecommerce-app'
+  const dispatch = useAppDispatch()
+
+  const repositoryFolders = useAppSelector((s) => s.spantest.repositoryFolders)
+  const repositoryItems = useAppSelector((s) => s.spantest.repositoryItems)
+
   const [search, setSearch] = useState('')
-  const [createEpicVisible, setCreateEpicVisible] = useState(false)
-  const [assignEpicVisible, setAssignEpicVisible] = useState(false)
-  const [selectedItemKey, setSelectedItemKey] = useState<string | null>(null)
-  const [form] = Form.useForm()
-  const [assignForm] = Form.useForm()
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('All')
+  const [frameworkFilter, setFrameworkFilter] = useState<string>('all')
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null) // null = all items
+  const [newFolderName, setNewFolderName] = useState('')
+  const [isAddingFolder, setIsAddingFolder] = useState(false)
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [moveModalItem, setMoveModalItem] = useState<RepositoryItem | null>(null)
+  const [viewingItem, setViewingItem] = useState<RepositoryItem | null>(null)
+  const [moveFolderId, setMoveFolderId] = useState<string | null>(null)
 
-  const filteredItems = useMemo(
-    () =>
-      items.filter((item) =>
-        item.name.toLowerCase().includes(search.trim().toLowerCase()),
-      ),
-    [items, search],
-  )
+  const projectFolders = repositoryFolders.filter((f) => f.projectId === projectId)
 
-  const createEpic = async () => {
-    try {
-      const values = await form.validateFields()
-      const id = values.name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const epicId = id || `epic-${Date.now()}`
+  const filteredItems = useMemo(() => {
+    return repositoryItems
+      .filter((item) => item.projectId === projectId)
+      .filter((item) => selectedFolderId === null || item.folderId === selectedFolderId)
+      .filter((item) => {
+        if (typeFilter === 'All') return true
+        if (typeFilter === 'Scenarios') return item.type === 'Scenario'
+        if (typeFilter === 'Test Cases') return item.type === 'Test Case'
+        if (typeFilter === 'Scripts') return item.type === 'Script'
+        return true
+      })
+      .filter((item) => frameworkFilter === 'all' || item.framework === frameworkFilter)
+      .filter((item) => !search || item.name.toLowerCase().includes(search.toLowerCase()))
+  }, [repositoryItems, projectId, selectedFolderId, typeFilter, frameworkFilter, search])
 
-      const newEpic: Epic = {
-        id: epicId,
-        name: values.name,
-        itemKeys: values.items || [],
-      }
-
-      setEpics((prev) => [...prev, newEpic])
-      setItems((prev) =>
-        prev.map((item) =>
-          newEpic.itemKeys.includes(item.key) ? { ...item, epicId: epicId } : item,
-        ),
-      )
-
-      setCreateEpicVisible(false)
-      form.resetFields()
-      message.success(`Epic '${values.name}' created with ${newEpic.itemKeys.length} item(s).`)
-    } catch {
-      // validation errors handled by form
-    }
+  function handleCreateFolder() {
+    const name = newFolderName.trim()
+    if (!name) return
+    dispatch(addRepositoryFolder({
+      id: `folder-${Date.now()}`,
+      name,
+      projectId,
+      createdAt: Date.now(),
+    }))
+    setNewFolderName('')
+    setIsAddingFolder(false)
   }
 
-  const openAssignEpic = (itemKey: string) => {
-    setSelectedItemKey(itemKey)
-    assignForm.setFieldsValue({ epicId: items.find((i) => i.key === itemKey)?.epicId })
-    setAssignEpicVisible(true)
+  function handleDeleteFolder(id: string) {
+    dispatch(deleteRepositoryFolder(id))
+    if (selectedFolderId === id) setSelectedFolderId(null)
   }
 
-  const assignItemToEpic = async () => {
-    try {
-      const values = await assignForm.validateFields()
-      if (!selectedItemKey) return
-
-      setItems((prev) =>
-        prev.map((item) =>
-          item.key === selectedItemKey ? { ...item, epicId: values.epicId } : item,
-        ),
-      )
-
-      setEpics((prev) =>
-        prev.map((epic) => {
-          const inEpic = epic.itemKeys.includes(selectedItemKey)
-          if (values.epicId === epic.id) {
-            return {
-              ...epic,
-              itemKeys: Array.from(new Set([...epic.itemKeys, selectedItemKey])),
-            }
-          }
-          if (inEpic) {
-            return {
-              ...epic,
-              itemKeys: epic.itemKeys.filter((k) => k !== selectedItemKey),
-            }
-          }
-          return epic
-        }),
-      )
-
-      setAssignEpicVisible(false)
-      setSelectedItemKey(null)
-      assignForm.resetFields()
-      message.success('Item mapped to epic successfully.')
-    } catch {
-      // validation errors handled by form
+  function handleRenameFolder(id: string) {
+    if (renameValue.trim()) {
+      dispatch(renameRepositoryFolder({ id, name: renameValue.trim() }))
     }
+    setRenamingFolderId(null)
+    setRenameValue('')
+  }
+
+  function handleMoveItem() {
+    if (!moveModalItem) return
+    dispatch(moveRepositoryItem({ id: moveModalItem.id, folderId: moveFolderId }))
+    message.success('Item moved')
+    setMoveModalItem(null)
+    setMoveFolderId(null)
   }
 
   return (
     <div>
       <div className={styles.breadcrumb}>
-        Projects / E-Commerce App / Test Library
+        Projects / {projectId.replace(/-/g, ' ')} / Repository
       </div>
       <div className={styles.pageHeader}>
         <div>
-          <Title level={3} style={{ marginBottom: 4 }}>
-            Test Library
-          </Title>
+          <Title level={3} style={{ marginBottom: 4 }}>Repository</Title>
           <Text type="secondary">Saved scenarios, test cases &amp; scripts</Text>
         </div>
         <div className={styles.pageActions}>
           <Input
-            placeholder="Search tests..."
+            placeholder="Search…"
             style={{ width: 200, height: 36 }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <Button type="default" onClick={() => setCreateEpicVisible(true)}>
-            + Create Epic
-          </Button>
-          <Button type="primary" onClick={() => navigate('/project/ecommerce-app/generator')}>
+          <Button type="primary" onClick={() => navigate(`/project/${projectId}/generator`)}>
             + New
           </Button>
         </div>
       </div>
 
-      <div className={styles.filterBar}>
-        <Button size="small" type="primary">All</Button>
-        <Button size="small">Scenarios</Button>
-        <Button size="small">Test Cases</Button>
-        <Button size="small">Scripts</Button>
-        <div className={styles.frameworkSelect}>
-          <Select
-            defaultValue="All frameworks"
-            style={{ width: 160, height: 32 }}
-            options={[
-              { value: 'all', label: 'All frameworks' },
-              { value: 'Playwright', label: 'Playwright' },
-              { value: 'Cypress', label: 'Cypress' },
-              { value: 'Jest', label: 'Jest' },
-              { value: 'Selenium', label: 'Selenium' },
-            ]}
-          />
+      <div className={styles.body}>
+        {/* ── Folder sidebar ─────────────────────── */}
+        <div className={styles.sidebar}>
+          <div className={styles.sidebarTitle}>Folders</div>
+
+          <button
+            className={`${styles.folderItem} ${selectedFolderId === null ? styles.folderItemActive : ''}`}
+            onClick={() => setSelectedFolderId(null)}
+          >
+            <FolderOpenOutlined className={styles.folderIcon} />
+            <span>All items</span>
+            <span className={styles.folderCount}>{repositoryItems.filter((i) => i.projectId === projectId).length}</span>
+          </button>
+
+          {projectFolders.map((folder) => {
+            const count = repositoryItems.filter((i) => i.folderId === folder.id).length
+            return (
+              <div key={folder.id} className={styles.folderRow}>
+                {renamingFolderId === folder.id ? (
+                  <input
+                    className={styles.renameInput}
+                    value={renameValue}
+                    autoFocus
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onBlur={() => handleRenameFolder(folder.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRenameFolder(folder.id)
+                      if (e.key === 'Escape') { setRenamingFolderId(null); setRenameValue('') }
+                    }}
+                  />
+                ) : (
+                  <button
+                    className={`${styles.folderItem} ${selectedFolderId === folder.id ? styles.folderItemActive : ''}`}
+                    onClick={() => setSelectedFolderId(folder.id)}
+                    onDoubleClick={() => { setRenamingFolderId(folder.id); setRenameValue(folder.name) }}
+                  >
+                    <FolderOutlined className={styles.folderIcon} />
+                    <span className={styles.folderName}>{folder.name}</span>
+                    <span className={styles.folderCount}>{count}</span>
+                  </button>
+                )}
+                <button
+                  className={styles.folderDelete}
+                  onClick={() => handleDeleteFolder(folder.id)}
+                  title="Delete folder"
+                >
+                  <DeleteOutlined />
+                </button>
+              </div>
+            )
+          })}
+
+          {isAddingFolder ? (
+            <div className={styles.newFolderWrap}>
+              <input
+                className={styles.renameInput}
+                value={newFolderName}
+                autoFocus
+                placeholder="Folder name"
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onBlur={handleCreateFolder}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateFolder()
+                  if (e.key === 'Escape') { setIsAddingFolder(false); setNewFolderName('') }
+                }}
+              />
+            </div>
+          ) : (
+            <button className={styles.addFolderBtn} onClick={() => setIsAddingFolder(true)}>
+              + New folder
+            </button>
+          )}
+        </div>
+
+        {/* ── Content ────────────────────────────── */}
+        <div className={styles.content}>
+          <div className={styles.filterBar}>
+            {TYPE_FILTER_OPTIONS.map((opt) => (
+              <Button
+                key={opt}
+                size="small"
+                type={typeFilter === opt ? 'primary' : 'default'}
+                onClick={() => setTypeFilter(opt)}
+              >
+                {opt}
+              </Button>
+            ))}
+            <div className={styles.frameworkSelect}>
+              <Select
+                value={frameworkFilter}
+                onChange={setFrameworkFilter}
+                style={{ width: 160, height: 32 }}
+                options={[
+                  { value: 'all', label: 'All frameworks' },
+                  { value: 'Playwright', label: 'Playwright' },
+                  { value: 'Cypress', label: 'Cypress' },
+                  { value: 'Jest', label: 'Jest' },
+                  { value: 'Selenium', label: 'Selenium' },
+                ]}
+              />
+            </div>
+          </div>
+
+          <Card>
+            {filteredItems.length === 0 ? (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>◻</div>
+                <div className={styles.emptyTitle}>
+                  {repositoryItems.filter((i) => i.projectId === projectId).length === 0
+                    ? 'No items saved yet'
+                    : 'No items match your filters'}
+                </div>
+                <div className={styles.emptySub}>
+                  {repositoryItems.filter((i) => i.projectId === projectId).length === 0
+                    ? 'Generate test cases and save them to the repository from the Generator'
+                    : 'Try adjusting your search or filters'}
+                </div>
+                {repositoryItems.filter((i) => i.projectId === projectId).length === 0 && (
+                  <Button
+                    type="primary"
+                    style={{ marginTop: 12 }}
+                    onClick={() => navigate(`/project/${projectId}/generator`)}
+                  >
+                    Go to Generator
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <Table<RepositoryItem>
+                rowKey="id"
+                size="small"
+                dataSource={filteredItems}
+                pagination={false}
+                columns={[
+                  {
+                    title: 'Name',
+                    dataIndex: 'name',
+                    render: (name: string) => <span style={{ fontWeight: 500 }}>{name}</span>,
+                  },
+                  {
+                    title: 'Type',
+                    dataIndex: 'type',
+                    render: (value: RepositoryItem['type']) => (
+                      <Tag bordered={false} style={{ borderRadius: 999 }}>{value}</Tag>
+                    ),
+                  },
+                  {
+                    title: 'Framework',
+                    dataIndex: 'framework',
+                    render: (value: string) => (
+                      <Text type="secondary" style={{ fontSize: 12 }}>{value}</Text>
+                    ),
+                  },
+                  {
+                    title: 'Folder',
+                    dataIndex: 'folderId',
+                    render: (folderId: string | null) => {
+                      const folder = repositoryFolders.find((f) => f.id === folderId)
+                      return folder
+                        ? <Tag color="blue" style={{ borderRadius: 999 }}>{folder.name}</Tag>
+                        : <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
+                    },
+                  },
+                  {
+                    title: 'Saved',
+                    dataIndex: 'createdAt',
+                    render: (ts: number) => (
+                      <Text type="secondary" style={{ fontSize: 12 }}>{relativeTime(ts)}</Text>
+                    ),
+                  },
+                  {
+                    title: 'Status',
+                    dataIndex: 'status',
+                    render: (value: RepositoryItem['status']) => (
+                      <Tag color={value === 'Ready' ? 'success' : 'default'} style={{ borderRadius: 999 }}>
+                        {value}
+                      </Tag>
+                    ),
+                  },
+                  {
+                    title: 'Actions',
+                    key: 'actions',
+                    render: (_: unknown, record: RepositoryItem) => (
+                      <div className={styles.tableActions}>
+                        <Button
+                          size="small"
+                          type="primary"
+                          ghost
+                          onClick={(e) => { e.stopPropagation(); setViewingItem(record) }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); setMoveModalItem(record); setMoveFolderId(record.folderId) }}
+                        >
+                          Move
+                        </Button>
+                        <Button
+                          size="small"
+                          danger
+                          onClick={(e) => { e.stopPropagation(); dispatch(deleteRepositoryItem(record.id)) }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            )}
+          </Card>
         </div>
       </div>
 
-      <Card>
-        <Table<LibraryItem>
-          rowKey="key"
-          size="small"
-          dataSource={filteredItems}
-          pagination={false}
-          onRow={() => ({
-            onClick: () => navigate('/project/ecommerce-app/generator'),
-          })}
-          columns={[
-            {
-              title: 'Name',
-              dataIndex: 'name',
-            },
-            {
-              title: 'Epic',
-              dataIndex: 'epicId',
-              render: (epicId: string | undefined) => {
-                const epic = epics.find((e) => e.id === epicId)
-                return epic ? (
-                  <Tag color="blue" style={{ borderRadius: 999 }}>
-                    {epic.name}
-                  </Tag>
-                ) : (
-                  <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
-                )
-              },
-            },
-            {
-              title: 'Type',
-              dataIndex: 'type',
-              render: (value: LibraryItem['type']) => (
-                <Tag bordered={false} style={{ borderRadius: 999 }}>
-                  {value}
-                </Tag>
-              ),
-            },
-            {
-              title: 'Framework',
-              dataIndex: 'framework',
-              render: (value: string) => (
-                <Text type="secondary" style={{ fontSize: 12 }}>{value}</Text>
-              ),
-            },
-            {
-              title: 'Created',
-              dataIndex: 'created',
-              render: (value: string) => (
-                <Text type="secondary" style={{ fontSize: 12 }}>{value}</Text>
-              ),
-            },
-            {
-              title: 'Status',
-              dataIndex: 'status',
-              render: (value: LibraryItem['status']) => (
-                <Tag
-                  color={value === 'Ready' ? 'success' : 'default'}
-                  style={{ borderRadius: 999 }}
-                >
-                  {value}
-                </Tag>
-              ),
-            },
-            {
-              title: 'Actions',
-              key: 'actions',
-              render: (_: unknown, record: LibraryItem) => (
-                <div className={styles.tableActions}>
-                  <Button
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigator.clipboard.writeText('// mock copy').catch(() => {})
-                    }}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      openAssignEpic(record.key)
-                    }}
-                  >
-                    Map to Epic
-                  </Button>
-                </div>
-              ),
-            },
+      <ItemViewDrawer
+        item={viewingItem}
+        folders={repositoryFolders}
+        onClose={() => setViewingItem(null)}
+      />
+
+      {/* Move to folder modal */}
+      <Modal
+        open={!!moveModalItem}
+        title="Move to folder"
+        onCancel={() => { setMoveModalItem(null); setMoveFolderId(null) }}
+        onOk={handleMoveItem}
+        okText="Move"
+      >
+        <Select
+          style={{ width: '100%' }}
+          value={moveFolderId ?? '__root__'}
+          onChange={(v) => setMoveFolderId(v === '__root__' ? null : v)}
+          options={[
+            { value: '__root__', label: 'Unfiled (root)' },
+            ...projectFolders.map((f) => ({ value: f.id, label: f.name })),
           ]}
         />
-      </Card>
-
-      <Modal
-        title="Create Epic"
-        open={createEpicVisible}
-        onCancel={() => {
-          setCreateEpicVisible(false)
-          form.resetFields()
-        }}
-        onOk={createEpic}
-      >
-        <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item
-            name="name"
-            label="Epic name"
-            rules={[{ required: true, message: 'Epic name is required' }]}
-          >
-            <Input placeholder="E.g. Payment flow tests" />
-          </Form.Item>
-          <Form.Item name="items" label="Select items to include">
-            <Select
-              mode="multiple"
-              placeholder="Choose tests"
-              options={items.map((item) => ({ value: item.key, label: item.name }))}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="Map item to Epic"
-        open={assignEpicVisible}
-        onCancel={() => {
-          setAssignEpicVisible(false)
-          setSelectedItemKey(null)
-          assignForm.resetFields()
-        }}
-        onOk={assignItemToEpic}
-      >
-        <Form form={assignForm} layout="vertical" preserve={false}>
-          <Form.Item
-            name="epicId"
-            label="Select epic"
-            rules={[{ required: true, message: 'Please select an epic' }]}
-          >
-            <Select placeholder="Select an epic">
-              {epics.map((e) => (
-                <Select.Option value={e.id} key={e.id}>
-                  {e.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Form>
       </Modal>
     </div>
   )
 }
 
-export default LibraryPage
+export default RepositoryPage

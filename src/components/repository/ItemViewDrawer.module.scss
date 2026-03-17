@@ -1,0 +1,43 @@
+.drawerTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drawerTitleMeta {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tcView {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.metaRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+.stepsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepsLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
